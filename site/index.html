@@ -55,7 +55,7 @@ Sift minus that method on logs, is -0.112 (95% interval [-0.18, -0.04]). 3 of th
 predictions held.</p>
 <p>The cause is specific. Sift counts every template it has never seen before as evidence. Sock Shop's front-end
 writes new, one-off lines all the time, faults or not; Online Boutique's services rarely do. The fix is to score a
-service's new templates against its own rate before the alarm. That is the next pre-registered test, on a third
+service's new templates against its own rate before the alarm. It will be pre-registered and tested once on a third
 application nobody has looked at yet.</p>
 
 <div class="tbl wide"><p class=cap><b>Table 1.</b> Test A (Sock Shop, opened once), 120 cases. Avg@5 is the mean of AC@1 to AC@5;
@@ -104,6 +104,8 @@ see a failure.</p>
 <p>The durability claim is for a process crash: power loss on macOS would also need <code>F_FULLFSYNC</code> and is
 not claimed. To try it: <code>pnpm install &amp;&amp; pnpm demo</code> replays one real incident through the whole path
 in about ten seconds, with no Docker, no download and no model.</p>
+<p>The design decisions and their costs, the interfaces, and how this would grow past one node are in the
+<a href="https://github.com/VijayChamakuri/sift#design-decisions-and-trade-offs">README</a>.</p>
 
 <h2>What's next</h2>
 <ul>

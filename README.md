@@ -14,9 +14,20 @@ reached Avg@5 **0.443** (AC@1 0.075) and ranked `front-end` first in
 given metrics, 0.770. Paired difference, Sift minus that method on logs:
 -0.112 (95% CI [-0.18, -0.04]). 3 of the seven predictions held.
 
-The reason is specific and fixable, and the fix is the next pre-registered test (below): Sift
+The reason is specific and fixable, and the fix will be pre-registered before the next system is opened (below): Sift
 counts every template it has never seen as evidence, and Sock Shop's front-end writes new,
 one-off lines all the time, faults or not. Online Boutique's services rarely do.
+
+### At a glance
+
+| | |
+|---|---|
+| **Engine** | OTLP/HTTP intake → write-ahead log (ack after fsync) → online template mining → Parquet + rollups under one atomic manifest → DuckDB. TypeScript, one process, no services needed. |
+| **Durability** | 100 SIGKILL crash runs, 20,493,200 acknowledged records: **0 lost, 0 duplicated**. The same harness catches a deliberately broken recovery. |
+| **Throughput** | 315,648 records/s over OTLP/HTTP, ack p50 19.8 ms / p99 253.6 ms, on a laptop (Apple M2, 8 GB RAM, Node 24.19.0). |
+| **Question** | Can logs alone rank the root-cause service? Pre-registered, three-system design, test sets opened once. |
+| **Answer so far** | Not reliably: the Dev design did not transfer to the first test system (3 of 7 predictions held). Cause diagnosed; the fix will be pre-registered before the next system is opened. |
+| **Try it** | `pnpm install && pnpm demo`: a real incident, end to end, in about ten seconds. |
 
 ![Avg@5 by fault type](docs/figures/by_fault.png)
 
@@ -140,6 +151,57 @@ future), error templates that grow, and log volume that departs from the system-
 a logged grid of 18 settings (Dev Avg@5 from 0.445 to 0.533; chosen
 `errorWeight0.5_wShift2_wSurge0.5`) and frozen before any test case was read.
 
+## Design decisions and trade-offs
+
+| Decision | Why | What it costs | What would change at scale |
+|---|---|---|---|
+| **Ack only after `fsync`, with group commit** | An acknowledged record survives a crash. Appends that arrive during one fsync share the next one, so throughput comes from batching, not from skipping the fsync. | Every ack waits for at least one fsync. | Replicate the log (quorum acks) instead of relying on one disk. |
+| **The WAL is the only source of truth** | Templates, segments and rollups are all derived, so recovery is "load the last manifest, replay the log after it". One commit boundary, testable at every step. | Replay time grows with the unflushed tail (bounded by the 1 s flush). | Checkpoint per partition; truncate the log behind the manifest. |
+| **JSON frames in the WAL** | Readable with standard tools while the format settles; CRC32 per frame finds torn tails. | Larger and slower to encode than a binary format (not yet measured). | Binary encoding (protobuf as received, or a columnar batch). |
+| **Online, per-service template mining (Drain)** | No future data leaks into the past: a template is new only when it first arrives. Per-service trees keep one service's patterns from absorbing another's. Lossless: every line rebuilds byte for byte. | A service that always writes one-off lines looks permanently novel; this is exactly the Test A failure. Lists of different lengths become separate templates. | Score novelty against each service's own rate (Sift v2); mask variable-length lists. |
+| **Parquet + DuckDB, embedded** | No servers to run, so the demo and the evaluation run anywhere; columnar storage with zstd suits template ids and parameters. | One process. Queries and flushes take one lock, so a long query delays the next flush. | Object storage for segments, a transactional catalog for the manifest, stateless query workers. |
+| **Minute rollups beside raw segments** | Most questions an agent asks ("which service's errors grew?") are counts; rollups answer them without scanning raw rows. | Extra bytes per flush (to be measured with the cost work). | Pre-aggregates per tenant and service, kept longer than raw data. |
+| **Exactly-once only within a stated window** | Batch ids are remembered for 10 minutes and rebuilt from the log after a crash; an older retry is rejected rather than risk a duplicate. | A sender without ids (a stock Collector) gets at-least-once. | Ids in a replicated index with a longer, configurable window. |
+
+## Interfaces
+
+| Surface | What it does |
+|---|---|
+| `POST /v1/logs` | OTLP/HTTP logs, protobuf or JSON. Optional headers `x-sift-batch-id` and `x-sift-batch-created` make retries exactly-once within the window. Errors are RFC 9457 problem bodies with a stable code; overload is `429` with `Retry-After`. |
+| `POST /query` | SQL over the views `logs`, `rollups` and `templates`; `"reconstruct": true` adds each row's original line. |
+| `GET /rank?at=<unix s>` | Ranked root-cause candidates with the evidence lines behind each. |
+| `sift serve \| replay \| rank \| rca \| doctor` | CLI; every command takes `--json` and runs without prompts. |
+
+Binds `127.0.0.1` by default: there is no authentication yet, so it must not face a network.
+
+## Scaling beyond one node (design, not built)
+
+Sift is one process by design: the question was whether the data answers it, not how many
+machines it takes. The shape it would grow into:
+
+- **Partition** by (tenant, service). Each partition has its own log, miner state and manifest,
+  so services never contend and a hot tenant can be moved alone.
+- **Replicate the log** with quorum acks, keeping today's contract: an ack still means the
+  record survives the loss of a machine, not just a process.
+- **Segments to object storage**, the manifest in a transactional catalog (Postgres), so a
+  commit stays one atomic pointer swap and old manifests stay readable.
+- **Stateless query workers** read Parquet and rollups from object storage; the agent's count
+  questions hit rollups first.
+- **Regions as cells:** data is ingested, stored and queried in its own region; only metadata
+  crosses regions.
+- **Deploys and rollback:** because manifests are immutable versions, rolling back a bad
+  compaction or format change is pointing back to the previous manifest; ingest nodes drain
+  by flushing and handing the log tail to the next process.
+
+## Limitations
+
+- One node; the durability claim is process crash, not machine or power loss.
+- No authentication; local use only.
+- The ranker is deterministic and uses no language model yet; an LLM investigator is the next
+  phase.
+- Results cover three RCAEval systems with injected faults; Test B is still sealed.
+- Throughput is one run on one laptop; the p99 ack latency has not been profiled yet.
+
 ## Durability
 
 | Check | Result |
@@ -214,7 +276,7 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 
 ## What's next
 
-- **Sift v2, pre-registered before Test B is opened:** score new templates against the service's
+- **Sift v2, to be pre-registered before Test B is opened:** score new templates against the service's
   own rate of new templates before the alarm, as the error-surge score already does, so a chatty
   service is not evidence by default. Designed on Dev; v1 and v2 are both scored on Test B
   (Train Ticket), which no design has seen.

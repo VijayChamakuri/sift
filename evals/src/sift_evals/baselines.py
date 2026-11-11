@@ -52,9 +52,13 @@ def derived(case: Case) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     paths = [out / f"{n}.parquet" for n in ("logts", "tracets_err", "tracets_lat")]
     if not all(p.exists() for p in paths):
         out.mkdir(parents=True, exist_ok=True)
-        logs = duckdb.sql(
-            f"select timestamp, container_name, message from read_parquet('{case.dir / 'logs.parquet'}')"
-        ).df()
+        logs = (
+            duckdb.sql(
+                f"select timestamp, container_name, message from read_parquet('{case.dir / 'logs.parquet'}')"
+            ).df()
+            if case.has_logs
+            else pd.DataFrame()  # no log file: logs-only variants get no signal, the others still run
+        )
         if logs.empty:
             logts = pd.DataFrame({"time": []})
         else:

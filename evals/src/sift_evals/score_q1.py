@@ -109,6 +109,8 @@ def score_split(split: str) -> dict:
         for m in per_method:
             if m != ref:
                 out["paired"][f"{m} - {ref}"] = paired_difference(per_method[m], per_method[ref])
+    if "sift_v2" in per_method and "sift" in per_method:  # Test B prediction 1 (PREREGISTRATION addendum)
+        out["paired"]["sift_v2 - sift"] = paired_difference(per_method["sift_v2"], per_method["sift"])
     return out
 
 

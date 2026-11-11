@@ -240,6 +240,67 @@ def predictions_table(test: dict, dev: dict) -> str:
     return "\n".join(rows) + f"\n\n{held} of {len(checks)} predictions held."
 
 
+def test_b_checks(tb: dict, q3b: dict) -> list[tuple[str, bool, str]]:
+    """The seven predictions of the PREREGISTRATION addendum, checked mechanically on Test B."""
+    v1, v2, baro = tb["methods"]["sift"], tb["methods"]["sift_v2"], tb["methods"]["baro"]
+    p21, p2l = tb["paired"]["sift_v2 - sift"], tb["paired"]["sift_v2 - mmbaro:logs"]
+    top1 = tb["top1_concentration"]["sift_v2"]
+    raw, gate_, mdl = (q3b["rungs"][r] for r in ("raw", "gate", "model"))
+    cut = (
+        raw["false_issues_per_hour"] / gate_["false_issues_per_hour"]
+        if gate_["false_issues_per_hour"]
+        else float("inf")
+    )
+    loss = raw["recall_any"] - gate_["recall_any"]
+    gap = mdl["recall_correct"] - gate_["recall_correct"]
+    opens = q3b["model"]["open_share"]
+    return [
+        (
+            "Sift v2 beats Sift v1 on Avg@5 (paired 95% CI above zero)",
+            p21["lo"] > 0,
+            f"{f3(v2['avg5'])} vs {f3(v1['avg5'])}, difference {p21['mean']:+.3f} {ci((p21['lo'], p21['hi']))}",
+        ),
+        (
+            "Sift v2 ranks no single service first in more than half of the cases",
+            top1["share_ranked_first"] <= 0.5,
+            f"`{top1['most_ranked_first']}` first in {top1['share_ranked_first']:.0%}",
+        ),
+        (
+            "Sift v2 stays below metric-based BARO on Avg@5",
+            v2["avg5"] < baro["avg5"],
+            f"{f3(v2['avg5'])} vs {f3(baro['avg5'])}",
+        ),
+        (
+            "Sift v2 beats logs-only multi-source BARO (paired 95% CI above zero)",
+            p2l["lo"] > 0,
+            f"difference {p2l['mean']:+.3f} {ci((p2l['lo'], p2l['hi']))}",
+        ),
+        (
+            "The gate cuts false issues per hour at least five-fold and loses at most 0.05 of any-service recall",
+            cut >= 5 and loss <= 0.05,
+            f"{raw['false_issues_per_hour']} to {gate_['false_issues_per_hour']} per hour ({cut:.1f}-fold); "
+            f"recall {f3(raw['recall_any'])} to {f3(gate_['recall_any'])}",
+        ),
+        (
+            "The model rung's right-service recall is within 0.05 of the gate's",
+            abs(gap) <= 0.05,
+            f"{f3(mdl['recall_correct'])} vs {f3(gate_['recall_correct'])} ({gap:+.3f})",
+        ),
+        (
+            'The model answers "open" to at least 90% of the gate-passed signals it sees',
+            opens >= 0.9,
+            f"{opens:.1%} of {q3b['model']['calls']} calls",
+        ),
+    ]
+
+
+def checks_table(checks: list[tuple[str, bool, str]], heading: str) -> str:
+    rows = [f"| {heading} | Outcome | Evidence |", "|---|---|---|"]
+    rows += [f"| {p} | {'held' if ok else '**failed**'} | {e} |" for p, ok, e in checks]
+    held = sum(ok for _, ok, _ in checks)
+    return "\n".join(rows) + f"\n\n{held} of {len(checks)} predictions held."
+
+
 def evidence_table(summary: dict) -> str:
     ev = summary.get("sift_top1_evidence", {})
     if not ev:

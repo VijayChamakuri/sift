@@ -20,7 +20,7 @@ from pathlib import Path
 
 import duckdb
 
-from .data import RESULTS, ROOT, Case, cases
+from .data import NO_LOGS, RESULTS, ROOT, Case, cases
 from .universe import case_universe
 
 ENGINE = ROOT / "engine"
@@ -64,6 +64,8 @@ def sift_command(case: Case, config: Path | None) -> list[str]:
 
 
 def sift_rca(case: Case, config: Path | None) -> tuple[list[str] | None, dict]:
+    if not case.has_logs:
+        return None, {"seconds": 0.0, "error": [NO_LOGS]}
     cmd = sift_command(case, config)
     t0 = time.perf_counter()
     p = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
@@ -128,8 +130,8 @@ def main() -> None:
                     "case": c.case,
                     "method": "control:error-surge",
                     "universe": universes[c.case],
-                    "ranks": error_surge(c),
-                    "error": None,
+                    "ranks": error_surge(c) if c.has_logs else None,
+                    "error": None if c.has_logs else NO_LOGS,
                 }
             )
         return rows

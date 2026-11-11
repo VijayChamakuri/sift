@@ -19,13 +19,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from .data import RESULTS, ROOT, Case, cases
+from .data import NO_LOGS, RESULTS, ROOT, Case, cases
 from .run_sift import ENGINE, blind_logs
 
 DEFAULT_LLM = "http://127.0.0.1:8090/v1"
 
 
 def watch(case: Case, config: Path | None, llm_url: str | None, max_llm: int) -> dict:
+    if not case.has_logs:
+        return {"case": case.case, "seconds": 0.0, "error": [NO_LOGS], "result": None}
     cmd = [
         "node",
         str(ENGINE / "dist/surfaces/cli.js"),

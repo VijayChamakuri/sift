@@ -57,6 +57,14 @@ class Case:
     def dir(self) -> Path:
         return CASES_DIR / self.case
 
+    @property
+    def has_logs(self) -> bool:
+        """RCAEval ships a few cases with no log file; every method scores them as empty input."""
+        return (self.dir / "logs.parquet").exists()
+
+
+NO_LOGS = "empty input: the case has no logs.parquet (scored as a miss)"
+
 
 def cases(split: str) -> list[Case]:
     """Every case of a split, in a fixed order. Runs enumerate this list before starting."""

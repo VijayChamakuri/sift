@@ -1,0 +1,9 @@
+{
+  "windowSeconds": 300,
+  "wNovelty": 1,
+  "minCount": 1,
+  "noveltyBaseline": true,
+  "errorWeight": 0.5,
+  "wShift": 2,
+  "wSurge": 0.5
+}

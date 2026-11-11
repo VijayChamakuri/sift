@@ -24,6 +24,11 @@ export interface RankConfig {
   wShift: number;
   errorWeight: number;
   minCount: number;
+  /**
+   * v2: subtract each service's own new-template mass in [T - window, T) from its mass after T, so a
+   * service that always writes one-off lines is not novel by default. Absent or false: v1 behaviour.
+   */
+  noveltyBaseline?: boolean;
 }
 
 export const DEFAULT_RANK_CONFIG: RankConfig = {
@@ -112,11 +117,15 @@ export async function rank(store: LogStore, atSeconds: number, cfg: RankConfig =
   const ranking: RankedService[] = [];
   for (const [service, ts] of perService) {
     let novelty = 0;
+    let noveltyBefore = 0;
     let surge = 0;
     const evidence: Evidence[] = [];
     for (const r of ts) {
       const text = r.template ?? "";
       const err = isErrorText(text, r.severity);
+      if (cfg.noveltyBaseline && r.first_ts >= t - w && r.first_ts < t && r.before >= cfg.minCount) {
+        noveltyBefore += (err ? cfg.errorWeight : 1) * Math.log1p(r.before);
+      }
       if (r.after >= cfg.minCount && r.first_ts >= t) {
         const v = (err ? cfg.errorWeight : 1) * Math.log1p(r.after);
         novelty += v;
@@ -132,6 +141,7 @@ export async function rank(store: LogStore, atSeconds: number, cfg: RankConfig =
     const z = (vol.after - expected) / Math.sqrt(expected + 1);
     const shift = Math.log1p(Math.abs(z));
     if (Math.abs(z) > 3) evidence.push({ kind: "shift", templateId: null, template: "(all lines)", before: vol.before, after: vol.after, example: null });
+    if (cfg.noveltyBaseline) novelty = Math.max(0, novelty - noveltyBefore);
     const score = cfg.wNovelty * novelty + cfg.wSurge * surge + cfg.wShift * shift;
     if (score > 0) {
       evidence.sort((a, b) => b.after - b.before - (a.after - a.before));

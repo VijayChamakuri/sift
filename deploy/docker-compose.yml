@@ -1,0 +1,18 @@
+# Local services for durable investigations: Temporal (dev server, SQLite inside) and Postgres for issues.
+# Start: docker compose -f deploy/docker-compose.yml up -d
+services:
+  postgres:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: sift
+      POSTGRES_PASSWORD: sift-local-only
+      POSTGRES_DB: sift
+    ports: ["127.0.0.1:5433:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "sift"]
+      interval: 2s
+      retries: 30
+  temporal:
+    image: temporalio/temporal:1.10.0
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--namespace", "default"]
+    ports: ["127.0.0.1:7233:7233", "127.0.0.1:8233:8233"]

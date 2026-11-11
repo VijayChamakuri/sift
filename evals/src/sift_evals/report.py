@@ -23,6 +23,7 @@ FIG = ROOT / "docs" / "figures"
 TEMPLATE = ROOT / "docs" / "README.template.md"
 NAMES = {
     "sift": "Sift (logs)",
+    "sift_v2": "Sift v2 (logs)",
     "control:error-surge": "Error-surge control (logs)",
     "mmbaro:logs": "Multi-source BARO, logs only",
     "mmbaro:traces": "Multi-source BARO, traces only",
@@ -56,10 +57,12 @@ def method_table(summary: dict, methods: list[str]) -> str:
         "|---|---|---:|---:|---:|---:|---:|---:|",
     ]
     for m in methods:
+        if m not in summary["methods"]:
+            continue  # e.g. Sift v2 has not been run on this split
         s = summary["methods"][m]
         signal = (
             "logs"
-            if m in ("sift", "control:error-surge", "mmbaro:logs")
+            if m in ("sift", "sift_v2", "control:error-surge", "mmbaro:logs")
             else m.split(":")[-1]
             if ":" in m
             else "metrics"
@@ -149,6 +152,24 @@ def ablation_chart(summary: dict, title: str, path: Path) -> None:
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
+
+
+RUNG_NAMES = {"raw": "Raw sensors", "gate": "+ deterministic gate", "model": "+ local model"}
+
+
+def q3_table(q3: dict) -> str:
+    rows = [
+        "| Rung | Detected, any service | Detected, right service | Median delay | False issues per hour | Issues per case |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for rung in RUNG_NAMES:  # ladder order, not the JSON key order
+        s = q3["rungs"][rung]
+        delay = "–" if s["median_delay_s"] is None else f"{s['median_delay_s']:.0f} s"
+        rows.append(
+            f"| {RUNG_NAMES[rung]} | {f3(s['recall_any'])} {ci(s['recall_any_ci'])} | {f3(s['recall_correct'])} {ci(s['recall_correct_ci'])} "
+            f"| {delay} | {s['false_issues_per_hour']} | {s['issues_per_case']} |"
+        )
+    return "\n".join(rows)
 
 
 def concentration_table(summary: dict) -> str:
@@ -259,6 +280,11 @@ def main() -> None:
 
     crash = json.loads((RESULTS / "infra" / "crash.json").read_text())
     sens = json.loads((RESULTS / "infra" / "crash_sensitivity.json").read_text())
+    q3 = json.loads((RESULTS / "q3" / "dev" / "summary.json").read_text())
+    durable = json.loads((RESULTS / "infra" / "durable.json").read_text())
+    collector = json.loads((RESULTS / "infra" / "collector.json").read_text())
+    v1repro = json.loads((RESULTS / "q1" / "dev" / "v1_reproduction.json").read_text())
+    tuning_v2 = json.loads((RESULTS / "q1" / "dev" / "tuning_v2.json").read_text())
     tp_path = RESULTS / "infra" / "throughput.json"
     tp = json.loads(tp_path.read_text()) if tp_path.exists() else None
     audit = json.loads((RESULTS / "audit" / "audit.json").read_text())
@@ -267,7 +293,42 @@ def main() -> None:
     s, ml, mm = hs["methods"]["sift"], hs["methods"]["mmbaro:logs"], hs["methods"]["mmbaro:metrics"]
     preds = predictions_table(hs, dev) if head != "dev" else "Test A not run yet."
     top1 = hs["top1_concentration"]["sift"]
+    model = q3["model"]
+    raw, gate_, mdl = q3["rungs"]["raw"], q3["rungs"]["gate"], q3["rungs"]["model"]
     values = {
+        "q3_table": q3_table(q3),
+        "q3_false_raw": str(raw["false_issues_per_hour"]),
+        "q3_false_gate": str(gate_["false_issues_per_hour"]),
+        "q3_false_cut": f"{raw['false_issues_per_hour'] / gate_['false_issues_per_hour']:.0f}"
+        if gate_["false_issues_per_hour"]
+        else "–",
+        "q3_recall_any": f3(gate_["recall_any"]),
+        "q3_recall_correct_gate": f3(gate_["recall_correct"]),
+        "q3_recall_correct_model": f3(mdl["recall_correct"]),
+        "q3_model": str(model["name"]),
+        "q3_calls": str(model["calls"]),
+        "q3_open_share": f"{model['open_share']:.1%}",
+        "q3_renamed": f"{model['renamed_service_share']:.1%}",
+        "q3_usable": f"{model['usable_answers']} of {model['calls']}",
+        "q3_latency": f"{model['median_latency_ms'] / 1000:.1f} s",
+        "q3_tokens_in": f"{model['median_input_tokens']:.0f}",
+        "q3_tokens_out": f"{model['median_output_tokens']:.0f}",
+        "durable_summary": "; ".join(
+            f"killed at `{r['crashPoint'].split('.')[-1]}`: {r['workflowsCompleted']} of {r['workflows']} workflows completed, "
+            f"{r['issueRows']} issues for {r['openDecisions']} opened names, {r['duplicateIssues']} duplicated"
+            for r in durable["results"]
+        ),
+        "collector_image": collector["collector"],
+        "collector_lines": f"{collector['linesWritten']:,}",
+        "collector_received": f"{collector['recordsReceived']:,}",
+        "collector_missing": str(collector["missing"]),
+        "collector_dup": str(collector["duplicated"]),
+        "collector_trimmed": str(collector["linesTrimmedByCollector"]),
+        "v1_repro": f"{v1repro['rankings_changed']} of {v1repro['rows']}",
+        "v2_dev_avg5": f3(dev["methods"]["sift_v2"]["avg5"]) if "sift_v2" in dev["methods"] else "–",
+        "v2_dev_ac1": f3(dev["methods"]["sift_v2"]["ac1"]) if "sift_v2" in dev["methods"] else "–",
+        "v2_tuning_min": f3(min(t["avg5"] for t in tuning_v2["trials"])),
+        "v2_tuning_max": f3(max(t["avg5"] for t in tuning_v2["trials"])),
         "predictions_table": preds,
         "predictions_held": preds.rsplit("\n", 1)[-1].split(" of ")[0] if head != "dev" else "None",
         "sift_top1_service": str(top1["most_ranked_first"]),

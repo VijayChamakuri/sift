@@ -25,6 +25,13 @@ async function lines(store: LogStore): Promise<string[]> {
 }
 
 describe("LogStore", () => {
+  it("answers queries on an empty store (no segments, no rollups yet)", async () => {
+    const s = await LogStore.open(await dir());
+    expect(await s.query("select count(*)::integer n from logs")).toEqual([{ n: 0 }]);
+    expect(await s.query("select count(*)::integer n from rollups")).toEqual([{ n: 0 }]);
+    await s.close();
+  });
+
   it("stores every line losslessly and reconstructs it from template + params", async () => {
     const d = await dir();
     const store = await LogStore.open(d);

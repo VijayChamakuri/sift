@@ -2,6 +2,8 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { gzipSync } from "node:zlib";
+
 import { afterEach, describe, expect, it } from "vitest";
 
 import { LogStore } from "../src/logstore/store.js";
@@ -53,6 +55,24 @@ describe("OTLP/HTTP intake and query API", () => {
     expect((await app.inject({ method: "POST", url: "/v1/logs", payload: body })).statusCode).toBe(200);
     const q = await app.inject({ method: "POST", url: "/query", payload: { sql: "select service, severity from logs" } });
     expect((q.json() as { rows: unknown[] }).rows).toEqual([{ service: "cart", severity: "ERROR" }]);
+  });
+
+  it("accepts gzip-compressed protobuf, as OpenTelemetry Collector exporters send by default", async () => {
+    const app = await server();
+    const payload = gzipSync(Buffer.from(encodeRequest([rec(7)])));
+    const res = await app.inject({ method: "POST", url: "/v1/logs", headers: { "content-type": "application/x-protobuf", "content-encoding": "gzip" }, payload });
+    expect(res.statusCode).toBe(200);
+    const q = await app.inject({ method: "POST", url: "/query", payload: { sql: "select template_id, template_version, params, verbatim from logs", reconstruct: true } });
+    expect((q.json() as { rows: { line: string }[] }).rows.map((r) => r.line)).toEqual(["request 7 ok"]);
+  });
+
+  it("rejects an unsupported content-encoding and a corrupt gzip body with stable codes", async () => {
+    const app = await server();
+    const bad = await app.inject({ method: "POST", url: "/v1/logs", headers: { "content-type": "application/x-protobuf", "content-encoding": "br" }, payload: Buffer.from([1]) });
+    expect(bad.statusCode).toBe(415);
+    const corrupt = await app.inject({ method: "POST", url: "/v1/logs", headers: { "content-type": "application/x-protobuf", "content-encoding": "gzip" }, payload: Buffer.from([31, 139, 0, 0]) });
+    expect(corrupt.statusCode).toBe(400);
+    expect(corrupt.json()).toMatchObject({ title: "SIFT-E101" });
   });
 
   it("rejects a malformed body with an RFC 9457 problem and a stable code", async () => {

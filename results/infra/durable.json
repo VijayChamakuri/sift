@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "model": "mlx-community/Qwen2.5-3B-Instruct-4bit",
+  "results": [
+    {
+      "crashPoint": "activity.llmVerdict",
+      "workerCrashed": true,
+      "workerRestarts": 1,
+      "workflows": 7,
+      "workflowsCompleted": 7,
+      "openDecisions": 5,
+      "issueRows": 5,
+      "duplicateIssues": 0,
+      "openWithoutIssue": 0
+    },
+    {
+      "crashPoint": "activity.openIssue",
+      "workerCrashed": true,
+      "workerRestarts": 1,
+      "workflows": 7,
+      "workflowsCompleted": 7,
+      "openDecisions": 5,
+      "issueRows": 5,
+      "duplicateIssues": 0,
+      "openWithoutIssue": 0
+    }
+  ],
+  "measuredAt": "2026-11-11T08:32:26.191Z"
+}

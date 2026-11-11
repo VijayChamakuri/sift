@@ -260,12 +260,12 @@ export class LogStore {
     await this.conn.run(
       segs.length
         ? `create or replace view logs as select * from read_parquet(${list(segs)})`
-        : `create or replace view logs as select * from (select 0::bigint seq, 0::bigint ts_ns, ''::varchar service, ''::varchar severity, 0::integer template_id, 0::integer template_version, ''::varchar params, null::varchar verbatim) where false`,
+        : `create or replace view logs as select * from (select 0::bigint as seq, 0::bigint as ts_ns, ''::varchar as service, ''::varchar as severity, 0::integer as template_id, 0::integer as template_version, ''::varchar as params, null::varchar as verbatim) where false`,
     );
     await this.conn.run(
       rolls.length
         ? `create or replace view rollups as select * from read_parquet(${list(rolls)})`
-        : `create or replace view rollups as select * from (select 0::bigint minute, ''::varchar service, 0::integer template_id, ''::varchar severity, 0::bigint n) where false`,
+        : `create or replace view rollups as select * from (select 0::bigint as "minute", ''::varchar as service, 0::integer as template_id, ''::varchar as severity, 0::bigint as n) where false`,
     );
     await this.conn.run(`create or replace table templates (template_id integer, service varchar, template varchar)`);
     const app = await this.conn.createAppender("templates");

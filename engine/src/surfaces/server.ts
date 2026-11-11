@@ -2,12 +2,17 @@
  * OTLP/HTTP intake (`POST /v1/logs`) and the local query API, over one LogStore.
  * Binds 127.0.0.1 by default: there is no authentication, so it must not face a network.
  */
+import { gunzipSync } from "node:zlib";
+
 import Fastify, { type FastifyInstance } from "fastify";
 
 import { SiftError } from "../errors.js";
 import type { LogStore } from "../logstore/store.js";
 import { rank } from "../detect/rank.js";
 import { parseRequest } from "./otlp.js";
+
+/** A gzip bomb must not inflate past this (the same order as the 16 MiB body limit, times 4). */
+const MAX_INFLATED = 64 * 1024 * 1024;
 
 export interface ServerOptions {
   bodyLimit?: number;
@@ -16,7 +21,23 @@ export interface ServerOptions {
 export function buildServer(store: LogStore, opts: ServerOptions = {}): FastifyInstance {
   const app = Fastify({ bodyLimit: opts.bodyLimit ?? 16 * 1024 * 1024, logger: false });
   for (const ct of ["application/x-protobuf", "application/protobuf", "application/json"]) {
-    app.addContentTypeParser(ct, { parseAs: "buffer" }, (_req, body, done) => done(null, body));
+    app.addContentTypeParser(ct, { parseAs: "buffer" }, (req, body, done) => {
+      // OpenTelemetry Collector exporters gzip OTLP/HTTP bodies by default
+      const encoding = String(req.headers["content-encoding"] ?? "identity").toLowerCase();
+      if (encoding === "identity") return done(null, body);
+      if (encoding !== "gzip") {
+        return done(new SiftError("SIFT-E101", `unsupported content-encoding ${encoding}`, "send identity or gzip", { httpStatus: 415 }), undefined);
+      }
+      try {
+        const raw = gunzipSync(body as Buffer, { maxOutputLength: MAX_INFLATED });
+        done(null, raw);
+      } catch (e) {
+        const tooBig = String(e).includes("maxOutputLength") || String(e).includes("Cannot create a Buffer");
+        done(tooBig
+          ? new SiftError("SIFT-E102", `gzip body inflates beyond ${MAX_INFLATED} bytes`, "send smaller batches", { httpStatus: 413 })
+          : new SiftError("SIFT-E101", `gzip body could not be decompressed: ${String(e).split("\n")[0]}`, "check the sender's compression setting", { httpStatus: 400 }), undefined);
+      }
+    });
   }
 
   app.setErrorHandler((err, req, reply) => {

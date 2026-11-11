@@ -90,3 +90,51 @@ Dev values in brackets.
 The ranker and miner code under `engine/src/`, `configs/rank.json`, the scoring code, the window,
 the candidate rule, the bootstrap and the evidence classifier. Any later change is reported as a
 new, labelled configuration and never replaces these numbers.
+
+---
+
+# Addendum: Test B (Train Ticket), committed before any Test B case is read
+
+Test A has been read (results above, 3 of 7 predictions held). Everything below was designed on
+Dev only. Test B is opened once, after this addendum is committed and tagged `q3-frozen`, and
+scores every configuration below in the same run.
+
+## Q1 configurations scored on Test B
+
+- **Sift v1**, unchanged: `configs/rank.json`. Its code changed after Test A only behind a flag
+  (v2) and in an empty-store query fix; re-running v1 on all 120 Dev cases gives 0 changed
+  rankings (`results/q1/dev/v1_reproduction.json`).
+- **Sift v2**: `configs/rank_v2.json`. Novelty is counted against the service's own new-template
+  mass in the window before the alarm, so a service that always writes one-off lines is not novel
+  by default. Motivated by the Test A diagnosis (post-hoc); tuned on Dev only by the same rule
+  (`results/q1/dev/tuning_v2.json`, 18 settings, Dev Avg@5 0.517 to 0.558, chosen at the edge
+  of the grid, not extended). Dev: Avg@5 0.558, AC@1 0.392.
+- The same baselines, control, candidate rule and scoring as Test A.
+
+## Q3: investigate before alert (`sift watch`)
+
+- **Input:** the case's logs only, replayed forward in 15 s steps of event time. The injection
+  time is never given to Sift; it is used only by the scorer (`evals/src/sift_evals/score_q3.py`).
+- **Configuration, not tuned:** `DEFAULT_WATCH_CONFIG` in `engine/src/detect/watch.ts` (z threshold
+  4, 60 s window against a 300 s baseline, 300 s warm-up, 120 s cooldown, 60 s gate); model
+  `mlx-community/Qwen2.5-3B-Instruct-4bit` through an OpenAI-compatible local server, temperature 0,
+  at most 8 model calls per case (later gate-passed signals keep the gate's decision).
+- **Rungs:** raw sensors; + deterministic gate; + model. A model answer that is unusable keeps the
+  gate's decision and is counted as a failure.
+- **Scoring:** detection window 300 s after injection; "any" and "correct service" (model rung: the
+  service the model names); issues before injection as false issues per monitored hour; repeat
+  issues per (service, sensor) deduplicated; censored cases excluded from recall and counted;
+  95% cluster bootstrap over (service, fault) scenarios.
+- **Dev results** (design set): raw 0.483 any / 0.068 correct / 52.5 false per hour; gate 0.475 /
+  0.110 / 4.0; model 0.475 / 0.127 / 4.0. The model answered "open" to 99.4% of gate-passed signals.
+
+## Predictions for Test B (written before Test B is read)
+
+1. Sift v2 beats Sift v1 on Avg@5 (paired 95% CI above zero).
+2. Sift v2 ranks no single service first in more than half of the cases.
+3. Sift v2 stays below metric-based BARO on Avg@5.
+4. Sift v2 beats logs-only multi-source BARO on Avg@5 (paired 95% CI above zero).
+5. The gate cuts false issues per hour at least five-fold against raw sensors, while losing at most
+   0.05 of any-service recall.
+6. The model rung's correct-service recall is within 0.05 of the gate's (the small model adds little).
+7. The model answers "open" to at least 90% of the gate-passed signals it sees.

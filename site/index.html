@@ -83,6 +83,20 @@ The metric-based baseline names a datastore first in most cases, and that datast
 failure on Sock Shop is the same pattern. The table shows it for every method.</p>
 <div class="tbl wide"><div class=scroll><table><thead><tr><th>Method</th><th>Most often ranked first</th><th class=n>Share of cases ranked first</th><th class=n>Share of cases it is the answer</th></tr></thead><tbody><tr><td>Sift (logs)</td><td><code>front-end</code></td><td class=n>0.99</td><td class=n>0.07</td></tr><tr><td>Error-surge control (logs)</td><td><code>front-end</code></td><td class=n>0.43</td><td class=n>0.07</td></tr><tr><td>Multi-source BARO, logs only</td><td><code>front-end</code></td><td class=n>0.42</td><td class=n>0.07</td></tr><tr><td>Multi-source BARO, traces only</td><td><code>None</code></td><td class=n>0.00</td><td class=n>0.00</td></tr><tr><td>Multi-source BARO, metrics only</td><td><code>session</code></td><td class=n>0.88</td><td class=n>0.00</td></tr><tr><td>Multi-source BARO, all signals</td><td><code>session</code></td><td class=n>0.88</td><td class=n>0.00</td></tr><tr><td>BARO (metrics)</td><td><code>session</code></td><td class=n>0.88</td><td class=n>0.00</td></tr></tbody></table></div></div>
 
+<h2>Noticing it in the first place</h2>
+<p>Ranking assumes someone already knows when something broke. In production the system has to notice,
+decide whether it matters, and only then page a person. <code>sift watch</code> does that on the same
+incidents without being told the fault time: logs replay in event time, sensors read only what has arrived,
+a deterministic gate re-measures a minute later, and a local model (mlx-community/Qwen2.5-3B-Instruct-4bit, through the Vercel AI SDK)
+reads numbered evidence and answers open or hold in checked JSON. Each investigation runs as a Temporal
+workflow and opens at most one issue in Postgres.</p>
+<div class="tbl wide"><p class=cap><b>Table 3.</b> Online Boutique (design set), 120 cases, five-minute detection
+window, configuration not tuned. Intervals are 95% cluster bootstraps.</p><div class=scroll><table><thead><tr><th>Rung</th><th class=n>Detected, any service</th><th class=n>Detected, right service</th><th class=n>Median delay</th><th class=n>False issues per hour</th><th class=n>Issues per case</th></tr></thead><tbody><tr><td>Raw sensors</td><td class=n>0.483 [0.36, 0.61]</td><td class=n>0.068 [0.02, 0.13]</td><td class=n>36 s</td><td class=n>52.54</td><td class=n>8.25</td></tr><tr><td>+ deterministic gate</td><td class=n>0.475 [0.35, 0.60]</td><td class=n>0.110 [0.05, 0.18]</td><td class=n>93 s</td><td class=n>4.0</td><td class=n>2.27</td></tr><tr><td>+ local model</td><td class=n>0.475 [0.35, 0.60]</td><td class=n>0.127 [0.06, 0.20]</td><td class=n>93 s</td><td class=n>4.0</td><td class=n>2.27</td></tr></tbody></table></div></div>
+<p>The gate does the work: it cuts false issues about 13-fold (52.54 to 4.0
+per hour) at the same detection rate. The small model barely changes anything: it answered "open" to
+99.4% of what the gate passed, with usable answers in 311 of 312 calls at a median of 3.5 s.
+That is a finding, not a failure to report: on a laptop, a 3B model is a rubber stamp for a good gate.</p>
+
 <h2>The engine</h2>
 <p>Logs arrive over OTLP/HTTP and are acknowledged only after an fsync of the write-ahead log. Templates are mined
 online per service and versioned, so every stored line rebuilds byte for byte. Parquet segments, rollups and the
@@ -97,6 +111,7 @@ see a failure.</p>
 <tr><td>Acknowledged records</td><td class=n>20,493,200</td></tr>
 <tr><td>Lost</td><td class=n><strong>0</strong></td></tr>
 <tr><td>Duplicated</td><td class=n><strong>0</strong></td></tr>
+<tr><td>Stock OpenTelemetry Collector (default exporter)</td><td class=n>32,531 of 32,531 lines, 0 duplicated</td></tr>
 <tr><td>OTLP/HTTP throughput, 8 senders</td><td class=n>315,648 records/s</td></tr>
 <tr><td>Ack latency per 1,000-record batch</td><td class=n>p50 19.8 ms, p99 253.6 ms</td></tr>
 <tr><td>Machine</td><td class=n>Apple M2, 8 GB RAM, Node 24.19.0</td></tr>
@@ -109,10 +124,10 @@ in about ten seconds, with no Docker, no download and no model.</p>
 
 <h2>What's next</h2>
 <ul>
-<li>Sift v2, pre-registered before the third application is opened: new templates scored against the service's own
+<li>Sift v2, frozen on the design set (Avg@5 0.558 there): new templates scored against the service's own
 rate before the alarm.</li>
-<li>Investigate before alert: sensors fire, a deterministic gate re-measures, a local model decides whether to open an
-issue, on forward-only replay with no access to the injection time.</li>
+<li>The third application (Train Ticket), opened once for v1, v2 and the investigate-before-alert rungs, with
+predictions committed first.</li>
 <li>Cost: lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.</li>
 </ul>
 

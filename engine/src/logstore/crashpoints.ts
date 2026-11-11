@@ -7,7 +7,9 @@ export type CrashPoint =
   | "wal.afterFsync"
   | "store.afterSegment"
   | "store.afterManifest"
-  | "store.midCompaction";
+  | "store.midCompaction"
+  | "activity.llmVerdict"
+  | "activity.openIssue";
 
 const spec = process.env.SIFT_CRASH_AT ?? "";
 const [target, nth] = spec.split(":");

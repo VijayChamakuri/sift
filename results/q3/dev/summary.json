@@ -1,0 +1,766 @@
+{
+  "by_fault": {
+    "cpu": {
+      "gate": {
+        "cases": 15,
+        "censored": 1,
+        "failed": 0,
+        "false_issues": 11,
+        "false_issues_per_hour": 6.16,
+        "issues_per_case": 1.47,
+        "median_delay_s": 145.0,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.286,
+        "recall_any_ci": [
+          0.067,
+          0.538
+        ],
+        "recall_correct": 0.143,
+        "recall_correct_ci": [
+          0.0,
+          0.333
+        ]
+      },
+      "model": {
+        "cases": 15,
+        "censored": 1,
+        "failed": 0,
+        "false_issues": 11,
+        "false_issues_per_hour": 6.16,
+        "issues_per_case": 1.47,
+        "median_delay_s": 145.0,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.286,
+        "recall_any_ci": [
+          0.067,
+          0.538
+        ],
+        "recall_correct": 0.143,
+        "recall_correct_ci": [
+          0.0,
+          0.333
+        ]
+      },
+      "raw": {
+        "cases": 15,
+        "censored": 1,
+        "failed": 0,
+        "false_issues": 111,
+        "false_issues_per_hour": 62.19,
+        "issues_per_case": 8.07,
+        "median_delay_s": 79,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.214,
+        "recall_any_ci": [
+          0.071,
+          0.333
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "delay": {
+      "gate": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 11,
+        "false_issues_per_hour": 6.17,
+        "issues_per_case": 1.07,
+        "median_delay_s": 176.0,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.133,
+        "recall_any_ci": [
+          0.0,
+          0.267
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "model": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 11,
+        "false_issues_per_hour": 6.17,
+        "issues_per_case": 1.07,
+        "median_delay_s": 176.0,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.133,
+        "recall_any_ci": [
+          0.0,
+          0.267
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "raw": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 99,
+        "false_issues_per_hour": 55.5,
+        "issues_per_case": 7.2,
+        "median_delay_s": 110.5,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.267,
+        "recall_any_ci": [
+          0.133,
+          0.333
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "disk": {
+      "gate": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 5,
+        "false_issues_per_hour": 2.81,
+        "issues_per_case": 0.6,
+        "median_delay_s": 21.0,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.133,
+        "recall_any_ci": [
+          0.0,
+          0.267
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "model": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 5,
+        "false_issues_per_hour": 2.81,
+        "issues_per_case": 0.6,
+        "median_delay_s": 21.0,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.133,
+        "recall_any_ci": [
+          0.0,
+          0.267
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "raw": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 104,
+        "false_issues_per_hour": 58.4,
+        "issues_per_case": 7.47,
+        "median_delay_s": 224,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.067,
+        "recall_any_ci": [
+          0.0,
+          0.2
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "f1": {
+      "gate": {
+        "cases": 9,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 2,
+        "false_issues_per_hour": 1.87,
+        "issues_per_case": 4.89,
+        "median_delay_s": 90,
+        "monitored_hours_before_injection": 1.07,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.333,
+        "recall_correct_ci": [
+          0.0,
+          0.667
+        ]
+      },
+      "model": {
+        "cases": 9,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 2,
+        "false_issues_per_hour": 1.87,
+        "issues_per_case": 4.89,
+        "median_delay_s": 90,
+        "monitored_hours_before_injection": 1.07,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.444,
+        "recall_correct_ci": [
+          0.333,
+          0.667
+        ]
+      },
+      "raw": {
+        "cases": 9,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 45,
+        "false_issues_per_hour": 42.03,
+        "issues_per_case": 8.78,
+        "median_delay_s": 30,
+        "monitored_hours_before_injection": 1.07,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.222,
+        "recall_correct_ci": [
+          0.0,
+          0.667
+        ]
+      }
+    },
+    "f2": {
+      "gate": {
+        "cases": 3,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 4,
+        "false_issues_per_hour": 11.13,
+        "issues_per_case": 4.67,
+        "median_delay_s": 93,
+        "monitored_hours_before_injection": 0.36,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "model": {
+        "cases": 3,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 4,
+        "false_issues_per_hour": 11.13,
+        "issues_per_case": 4.67,
+        "median_delay_s": 93,
+        "monitored_hours_before_injection": 0.36,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "raw": {
+        "cases": 3,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 16,
+        "false_issues_per_hour": 44.51,
+        "issues_per_case": 9.67,
+        "median_delay_s": 33,
+        "monitored_hours_before_injection": 0.36,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "f3": {
+      "gate": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 0,
+        "false_issues_per_hour": 0.0,
+        "issues_per_case": 3.33,
+        "median_delay_s": 88.0,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "model": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 0,
+        "false_issues_per_hour": 0.0,
+        "issues_per_case": 3.33,
+        "median_delay_s": 88.0,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      },
+      "raw": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 23,
+        "false_issues_per_hour": 32.39,
+        "issues_per_case": 7.83,
+        "median_delay_s": 28.5,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "f4": {
+      "gate": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 1,
+        "false_issues_per_hour": 1.4,
+        "issues_per_case": 4.17,
+        "median_delay_s": 85.0,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.167,
+        "recall_correct_ci": [
+          0.0,
+          0.333
+        ]
+      },
+      "model": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 1,
+        "false_issues_per_hour": 1.4,
+        "issues_per_case": 4.17,
+        "median_delay_s": 85.0,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.167,
+        "recall_correct_ci": [
+          0.0,
+          0.333
+        ]
+      },
+      "raw": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 26,
+        "false_issues_per_hour": 36.49,
+        "issues_per_case": 8.83,
+        "median_delay_s": 25.0,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.167,
+        "recall_correct_ci": [
+          0.0,
+          0.333
+        ]
+      }
+    },
+    "f5": {
+      "gate": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 5,
+        "false_issues_per_hour": 7.03,
+        "issues_per_case": 5.83,
+        "median_delay_s": 81.5,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.667,
+        "recall_correct_ci": [
+          0.333,
+          1.0
+        ]
+      },
+      "model": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 5,
+        "false_issues_per_hour": 7.03,
+        "issues_per_case": 5.83,
+        "median_delay_s": 81.5,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.667,
+        "recall_correct_ci": [
+          0.333,
+          1.0
+        ]
+      },
+      "raw": {
+        "cases": 6,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 35,
+        "false_issues_per_hour": 49.24,
+        "issues_per_case": 10.5,
+        "median_delay_s": 21.5,
+        "monitored_hours_before_injection": 0.71,
+        "recall_any": 1.0,
+        "recall_any_ci": [
+          1.0,
+          1.0
+        ],
+        "recall_correct": 0.5,
+        "recall_correct_ci": [
+          0.333,
+          0.667
+        ]
+      }
+    },
+    "loss": {
+      "gate": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 3,
+        "false_issues_per_hour": 1.69,
+        "issues_per_case": 3.87,
+        "median_delay_s": 110.5,
+        "monitored_hours_before_injection": 1.77,
+        "recall_any": 0.8,
+        "recall_any_ci": [
+          0.667,
+          0.933
+        ],
+        "recall_correct": 0.067,
+        "recall_correct_ci": [
+          0.0,
+          0.2
+        ]
+      },
+      "model": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 3,
+        "false_issues_per_hour": 1.69,
+        "issues_per_case": 3.8,
+        "median_delay_s": 110.5,
+        "monitored_hours_before_injection": 1.77,
+        "recall_any": 0.8,
+        "recall_any_ci": [
+          0.667,
+          0.933
+        ],
+        "recall_correct": 0.133,
+        "recall_correct_ci": [
+          0.0,
+          0.267
+        ]
+      },
+      "raw": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 95,
+        "false_issues_per_hour": 53.55,
+        "issues_per_case": 10.13,
+        "median_delay_s": 58.5,
+        "monitored_hours_before_injection": 1.77,
+        "recall_any": 0.8,
+        "recall_any_ci": [
+          0.667,
+          0.933
+        ],
+        "recall_correct": 0.067,
+        "recall_correct_ci": [
+          0.0,
+          0.2
+        ]
+      }
+    },
+    "mem": {
+      "gate": {
+        "cases": 15,
+        "censored": 1,
+        "failed": 0,
+        "false_issues": 7,
+        "false_issues_per_hour": 3.94,
+        "issues_per_case": 0.93,
+        "median_delay_s": 114,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.214,
+        "recall_any_ci": [
+          0.0,
+          0.467
+        ],
+        "recall_correct": 0.071,
+        "recall_correct_ci": [
+          0.0,
+          0.214
+        ]
+      },
+      "model": {
+        "cases": 15,
+        "censored": 1,
+        "failed": 0,
+        "false_issues": 7,
+        "false_issues_per_hour": 3.94,
+        "issues_per_case": 0.93,
+        "median_delay_s": 114,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.214,
+        "recall_any_ci": [
+          0.0,
+          0.467
+        ],
+        "recall_correct": 0.071,
+        "recall_correct_ci": [
+          0.0,
+          0.214
+        ]
+      },
+      "raw": {
+        "cases": 15,
+        "censored": 1,
+        "failed": 0,
+        "false_issues": 96,
+        "false_issues_per_hour": 54.03,
+        "issues_per_case": 7.4,
+        "median_delay_s": 126.5,
+        "monitored_hours_before_injection": 1.78,
+        "recall_any": 0.286,
+        "recall_any_ci": [
+          0.0,
+          0.667
+        ],
+        "recall_correct": 0.0,
+        "recall_correct_ci": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "socket": {
+      "gate": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 8,
+        "false_issues_per_hour": 4.51,
+        "issues_per_case": 1.07,
+        "median_delay_s": 209,
+        "monitored_hours_before_injection": 1.77,
+        "recall_any": 0.2,
+        "recall_any_ci": [
+          0.0,
+          0.467
+        ],
+        "recall_correct": 0.067,
+        "recall_correct_ci": [
+          0.0,
+          0.2
+        ]
+      },
+      "model": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 8,
+        "false_issues_per_hour": 4.51,
+        "issues_per_case": 1.07,
+        "median_delay_s": 209,
+        "monitored_hours_before_injection": 1.77,
+        "recall_any": 0.2,
+        "recall_any_ci": [
+          0.0,
+          0.467
+        ],
+        "recall_correct": 0.067,
+        "recall_correct_ci": [
+          0.0,
+          0.2
+        ]
+      },
+      "raw": {
+        "cases": 15,
+        "censored": 0,
+        "failed": 0,
+        "false_issues": 98,
+        "false_issues_per_hour": 55.25,
+        "issues_per_case": 7.67,
+        "median_delay_s": 133,
+        "monitored_hours_before_injection": 1.77,
+        "recall_any": 0.2,
+        "recall_any_ci": [
+          0.067,
+          0.333
+        ],
+        "recall_correct": 0.067,
+        "recall_correct_ci": [
+          0.0,
+          0.2
+        ]
+      }
+    }
+  },
+  "model": {
+    "calls": 312,
+    "failures": {
+      "none": 311,
+      "unknown_service": 1
+    },
+    "gate_passed_signals": 365,
+    "median_input_tokens": 298.0,
+    "median_latency_ms": 3501.5,
+    "median_output_tokens": 59.0,
+    "name": "mlx-community/Qwen2.5-3B-Instruct-4bit",
+    "open_share": 0.994,
+    "renamed_service_share": 0.039,
+    "skipped_by_cap": 53,
+    "usable_answers": 311
+  },
+  "rungs": {
+    "gate": {
+      "cases": 120,
+      "censored": 2,
+      "failed": 0,
+      "false_issues": 57,
+      "false_issues_per_hour": 4.0,
+      "issues_per_case": 2.27,
+      "median_delay_s": 93.0,
+      "monitored_hours_before_injection": 14.24,
+      "recall_any": 0.475,
+      "recall_any_ci": [
+        0.347,
+        0.597
+      ],
+      "recall_correct": 0.11,
+      "recall_correct_ci": [
+        0.05,
+        0.185
+      ]
+    },
+    "model": {
+      "cases": 120,
+      "censored": 2,
+      "failed": 0,
+      "false_issues": 57,
+      "false_issues_per_hour": 4.0,
+      "issues_per_case": 2.27,
+      "median_delay_s": 93.0,
+      "monitored_hours_before_injection": 14.24,
+      "recall_any": 0.475,
+      "recall_any_ci": [
+        0.347,
+        0.597
+      ],
+      "recall_correct": 0.127,
+      "recall_correct_ci": [
+        0.06,
+        0.203
+      ]
+    },
+    "raw": {
+      "cases": 120,
+      "censored": 2,
+      "failed": 0,
+      "false_issues": 748,
+      "false_issues_per_hour": 52.54,
+      "issues_per_case": 8.25,
+      "median_delay_s": 36,
+      "monitored_hours_before_injection": 14.24,
+      "recall_any": 0.483,
+      "recall_any_ci": [
+        0.361,
+        0.608
+      ],
+      "recall_correct": 0.068,
+      "recall_correct_ci": [
+        0.017,
+        0.127
+      ]
+    }
+  },
+  "split": "dev",
+  "window_seconds": 300
+}

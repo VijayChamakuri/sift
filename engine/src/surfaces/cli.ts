@@ -9,6 +9,9 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 
 import { DEFAULT_RANK_CONFIG, rank, type RankConfig } from "../detect/rank.js";
+import { llmFromEnv } from "../detect/investigate.js";
+import { runWatch } from "../detect/run.js";
+import { DEFAULT_WATCH_CONFIG, type WatchConfig } from "../detect/watch.js";
 import { SiftError } from "../errors.js";
 import { LogStore } from "../logstore/store.js";
 import { readLogFile, replayDirect, replayHttp } from "./replay.js";
@@ -21,6 +24,8 @@ Commands:
   sift replay --logs FILE (--data DIR | --url URL)             replay a Parquet log file
   sift rank   --data DIR --at UNIX_SECONDS                     rank likely root-cause services
   sift rca    --logs FILE --at UNIX_SECONDS [--data DIR]       replay into a fresh store, then rank
+  sift watch  --logs FILE [--no-llm] [--max-llm N] [--durable] forward-only sensors + investigation
+  sift worker                                                  Temporal worker for durable investigations
   sift doctor                                                  check prerequisites
 
 Common flags: --json (machine-readable output), --config FILE (ranker config JSON)
@@ -31,7 +36,9 @@ const EXAMPLES: Record<string, string> = {
   replay: "sift replay --logs data/rcaeval/hf/re2ob_checkoutservice_cpu_1/logs.parquet --url http://127.0.0.1:4318",
   rank: "sift rank --data .sift/data --at 1705354566 --json",
   rca: "sift rca --logs fixtures/demo/logs.parquet --at 1705354566 --json",
+  watch: "SIFT_LLM_BASE_URL=http://127.0.0.1:8090/v1 sift watch --logs fixtures/demo/logs.parquet --json",
   doctor: "sift doctor --json",
+  worker: "SIFT_LLM_BASE_URL=http://127.0.0.1:8090/v1 sift worker",
 };
 
 const options = {
@@ -45,6 +52,10 @@ const options = {
   batch: { type: "string", default: "2000" },
   json: { type: "boolean", default: false },
   keep: { type: "boolean", default: false },
+  "no-llm": { type: "boolean", default: false },
+  durable: { type: "boolean", default: false },
+  "run-id": { type: "string" },
+  "max-llm": { type: "string", default: "8" },
   help: { type: "boolean", default: false },
 } as const;
 
@@ -142,6 +153,55 @@ async function main(argv: string[]): Promise<void> {
         await store.close();
         if (!v.data && !v.keep) await rm(dir, { recursive: true, force: true });
       }
+      return;
+    }
+    case "watch": {
+      const records = await readLogFile(need(v, "logs", "watch"));
+      let cfg: WatchConfig = DEFAULT_WATCH_CONFIG;
+      if (v.config) {
+        try {
+          cfg = { ...cfg, ...(JSON.parse(await readFile(v.config, "utf8")) as Partial<WatchConfig>) };
+        } catch (e) {
+          throw new SiftError("SIFT-E104", `watch config ${v.config} is unreadable: ${String(e)}`, "pass a JSON file with WatchConfig fields, or omit --config");
+        }
+      }
+      const llm = v["no-llm"] ? null : llmFromEnv();
+      if (v.durable) {
+        // gate in process; model call and issue in a Temporal workflow per gate-passed signal
+        const { connectClient, startInvestigation, waitAll } = await import("../durable/worker.js");
+        const client = await connectClient();
+        const runId = v["run-id"] ?? `run-${Date.now()}`;
+        const ids: string[] = [];
+        const services = new Set<string>();
+        for (const r of records) services.add(r.service);
+        const result = await runWatch(records, cfg, {
+          llm: null,
+          maxLlmCalls: 0,
+          onInvestigation: async (inv) => {
+            if (!inv.gate.pass) return;
+            ids.push(await startInvestigation(client, {
+              runId, stableName: `${inv.signal.service}:${inv.signal.sensor}`, signal: inv.signal,
+              gatePass: true, evidence: inv.evidence, services: [...services],
+            }));
+          },
+        });
+        const outcomes = await waitAll(client, ids);
+        out(v, { runId, signals: result.investigations.length, workflows: ids.length, outcomes }, () =>
+          `run ${runId}: ${result.investigations.length} signals, ${ids.length} workflows, ${outcomes.filter((o) => o.issueCreated).length} issues opened`);
+        await client.connection.close();
+        return;
+      }
+      const result = await runWatch(records, cfg, { llm, maxLlmCalls: Number(v["max-llm"] ?? 8) });
+      out(v, { config: cfg, model: llm?.model ?? null, ...result }, () =>
+        result.investigations.map((i) => {
+          const verdict = i.llm?.verdict ? `llm ${i.llm.verdict}` : i.llmSkipped ?? `llm ${i.llm?.failure}`;
+          return `${new Date(i.signal.at * 1000).toISOString().slice(11, 19)} ${i.signal.service.padEnd(22)} ${i.signal.sensor.padEnd(9)} gate ${i.gate.pass ? "pass" : "hold"}  ${verdict}`;
+        }).join("\n") || "no signals");
+      return;
+    }
+    case "worker": {
+      const { runWorker } = await import("../durable/worker.js");
+      await runWorker();
       return;
     }
     case "doctor": {

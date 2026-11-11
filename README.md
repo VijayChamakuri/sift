@@ -27,6 +27,8 @@ one-off lines all the time, faults or not. Online Boutique's services rarely do.
 | **Throughput** | 315,648 records/s over OTLP/HTTP, ack p50 19.8 ms / p99 253.6 ms, on a laptop (Apple M2, 8 GB RAM, Node 24.19.0). |
 | **Question** | Can logs alone rank the root-cause service? Pre-registered, three-system design, test sets opened once. |
 | **Answer so far** | Not reliably: the Dev design did not transfer to the first test system (3 of 7 predictions held). Cause diagnosed; the fix will be pre-registered before the next system is opened. |
+| **Agent** | Sensors fire on logs as they arrive; a deterministic gate re-measures; a local model (mlx-community/Qwen2.5-3B-Instruct-4bit, via the Vercel AI SDK) decides open or hold; each investigation runs as a Temporal workflow and opens at most one issue in Postgres. On Dev the gate cut false issues from 52.54 to 4.0 per hour; the model added little (99.4% "open"). |
+| **Interop** | A stock OpenTelemetry Collector (otel/opentelemetry-collector-contrib:0.165.0, default exporter: protobuf, gzip, retries) delivered 32,531 of 32,531 lines, 0 duplicated. |
 | **Try it** | `pnpm install && pnpm demo`: a real incident, end to end, in about ten seconds. |
 
 ![Avg@5 by fault type](docs/figures/by_fault.png)
@@ -113,6 +115,49 @@ service is the answer:
 | Multi-source BARO, all signals | `session` | 0.88 | 0.00 |
 | BARO (metrics) | `session` | 0.88 | 0.00 |
 
+## Investigate before alert (the agent)
+
+Root-cause ranking assumes someone already knows when something broke. In production nobody tells
+you; the system has to notice, decide whether it matters, and only then page someone. `sift watch`
+does that on the same incidents, forward-only: logs replay in event time, sensors read only what
+has arrived, and the injection time is never given to Sift.
+
+```
+logs ──▶ sensors (rate, error surge, new error template; per service, Poisson z vs own baseline)
+           │ signal at t
+           ▼
+         gate: wait 60 s, re-measure; open only if the change persists and is specific to the
+           │   service, not a system-wide shift
+           ▼
+         local model (Vercel AI SDK, OpenAI-compatible): numbered evidence in, JSON out
+           │   {verdict, service, summary, evidence}; schema-checked; citations must exist;
+           │   log text is quoted as data; any unusable answer keeps the gate's decision
+           ▼
+         Temporal workflow: model call as a retried activity, issue as an idempotent
+         Postgres insert (one issue per service and sensor per run)
+```
+
+#### Dev results (design set, 120 cases, 5-minute detection window, not tuned)
+
+| Rung | Detected, any service | Detected, right service | Median delay | False issues per hour | Issues per case |
+|---|---:|---:|---:|---:|---:|
+| Raw sensors | 0.483 [0.36, 0.61] | 0.068 [0.02, 0.13] | 36 s | 52.54 | 8.25 |
+| + deterministic gate | 0.475 [0.35, 0.60] | 0.110 [0.05, 0.18] | 93 s | 4.0 | 2.27 |
+| + local model | 0.475 [0.35, 0.60] | 0.127 [0.06, 0.20] | 93 s | 4.0 | 2.27 |
+
+- **The gate does the work.** It cuts false issues per hour about 13-fold
+  (52.54 to 4.0) while keeping detection the same.
+- **The small model adds little.** mlx-community/Qwen2.5-3B-Instruct-4bit answered "open" to 99.4% of the
+  gate-passed signals it saw and named a different service than the signal in 3.9% of
+  answers. Its answers were usable in 311 of 312 calls (median 3.5 s, 298
+  tokens in, 59 out). Right-service detection moved from 0.110
+  (gate) to 0.127 (model), inside the noise.
+- **Logs see about half the faults within five minutes, and rarely name the right service
+  first**: the same CPU, memory and disk blind spot as the ranking results.
+
+Pre-registered for Test B: the same configuration, untouched, and predictions for each rung
+([PREREGISTRATION.md](PREREGISTRATION.md), addendum).
+
 ## Try it
 
 ```bash
@@ -170,6 +215,8 @@ a logged grid of 18 settings (Dev Avg@5 from 0.445 to 0.533; chosen
 | `POST /v1/logs` | OTLP/HTTP logs, protobuf or JSON. Optional headers `x-sift-batch-id` and `x-sift-batch-created` make retries exactly-once within the window. Errors are RFC 9457 problem bodies with a stable code; overload is `429` with `Retry-After`. |
 | `POST /query` | SQL over the views `logs`, `rollups` and `templates`; `"reconstruct": true` adds each row's original line. |
 | `GET /rank?at=<unix s>` | Ranked root-cause candidates with the evidence lines behind each. |
+| `sift watch --logs FILE [--durable]` | Forward-only sensors, gate and model investigator; `--durable` runs each investigation as a Temporal workflow. |
+| `sift worker` | Temporal worker for durable investigations (`docker compose -f deploy/docker-compose.yml up -d` starts Temporal and Postgres). |
 | `sift serve \| replay \| rank \| rca \| doctor` | CLI; every command takes `--json` and runs without prompts. |
 
 Binds `127.0.0.1` by default: there is no authentication yet, so it must not face a network.
@@ -197,8 +244,8 @@ machines it takes. The shape it would grow into:
 
 - One node; the durability claim is process crash, not machine or power loss.
 - No authentication; local use only.
-- The ranker is deterministic and uses no language model yet; an LLM investigator is the next
-  phase.
+- The language model is a 3B model on a laptop; it rubber-stamps the gate. A stronger model, or a
+  task it is better suited to (naming the upstream service from callers' errors), is open work.
 - Results cover three RCAEval systems with injected faults; Test B is still sealed.
 - Throughput is one run on one laptop; the p99 ack latency has not been profiled yet.
 
@@ -213,6 +260,8 @@ machines it takes. The shape it would grow into:
 | Lost | **0** |
 | Duplicated | **0** |
 | Harness sensitivity: same runs with recovery deliberately broken | 390,200 of 826,800 records lost across 6 runs (detected) |
+| Durable investigations (Temporal worker killed mid-investigation, then restarted) | killed at `llmVerdict`: 7 of 7 workflows completed, 5 issues for 5 opened names, 0 duplicated; killed at `openIssue`: 7 of 7 workflows completed, 5 issues for 5 opened names, 0 duplicated |
+| Stock OpenTelemetry Collector, default exporter settings | 32,531 of 32,531 lines received, 0 missing, 0 duplicated; 702 lines arrive right-trimmed because the Collector's `filelog` receiver trims trailing whitespace by default |
 
 The claim is "no acknowledged record lost or duplicated on process crash, for a sender that uses
 batch ids within the 10-minute retry window". Acks follow `fsync`; power-loss durability on
@@ -250,6 +299,7 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 | Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |
 |---|---|---:|---:|---:|---:|---:|---:|
 | **Sift (logs)** | logs | 0.375 | 0.542 | 0.533 | [0.41, 0.66] | +0.283 | 0 |
+| Sift v2 (logs) | logs | 0.392 | 0.567 | 0.558 | [0.43, 0.68] | +0.308 | 0 |
 | Error-surge control (logs) | logs | 0.074 | 0.418 | 0.373 | [0.29, 0.46] | +0.123 | 0 |
 | Multi-source BARO, logs only | logs | 0.150 | 0.250 | 0.252 | [0.15, 0.37] | +0.002 | 0 |
 | Multi-source BARO, traces only | traces | 0.167 | 0.400 | 0.445 | [0.34, 0.56] | +0.195 | 0 |
@@ -260,6 +310,7 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 | Method | Most often ranked first | Share of cases ranked first | Share of cases it is the answer |
 |---|---|---:|---:|
 | Sift (logs) | `checkoutservice` | 0.24 | 0.15 |
+| Sift v2 (logs) | `checkoutservice` | 0.25 | 0.15 |
 | Error-surge control (logs) | `frontend` | 0.36 | 0.00 |
 | Multi-source BARO, logs only | `recommendationservice` | 0.74 | 0.15 |
 | Multi-source BARO, traces only | `frontend` | 0.57 | 0.00 |
@@ -276,12 +327,11 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 
 ## What's next
 
-- **Sift v2, to be pre-registered before Test B is opened:** score new templates against the service's
-  own rate of new templates before the alarm, as the error-surge score already does, so a chatty
-  service is not evidence by default. Designed on Dev; v1 and v2 are both scored on Test B
-  (Train Ticket), which no design has seen.
-- **Q3, investigate before alert:** sensors fire, a deterministic gate re-measures, a local model
-  decides whether to open an issue, on forward-only replay with no access to the injection time.
+- **Test B (Train Ticket), pre-registered, not yet opened:** Sift v1, Sift v2 (new templates
+  scored against the service's own rate before the alarm; Dev Avg@5 0.558, AC@1
+  0.392, from a logged grid of 18 settings spanning 0.517 to 0.558)
+  and the investigate-before-alert rungs, all scored once. v1 is unchanged: re-running it on Dev
+  after the v2 change gives 0 of 240 changed rankings.
 - **Cost:** lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.
 
 ## Reproduce

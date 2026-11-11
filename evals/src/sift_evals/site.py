@@ -162,6 +162,20 @@ The metric-based baseline names a datastore first in most cases, and that datast
 failure on Sock Shop is the same pattern. The table shows it for every method.</p>
 <div class="tbl wide">{{concentration_table}}</div>
 
+<h2>Noticing it in the first place</h2>
+<p>Ranking assumes someone already knows when something broke. In production the system has to notice,
+decide whether it matters, and only then page a person. <code>sift watch</code> does that on the same
+incidents without being told the fault time: logs replay in event time, sensors read only what has arrived,
+a deterministic gate re-measures a minute later, and a local model ({{q3_model}}, through the Vercel AI SDK)
+reads numbered evidence and answers open or hold in checked JSON. Each investigation runs as a Temporal
+workflow and opens at most one issue in Postgres.</p>
+<div class="tbl wide"><p class=cap><b>Table 3.</b> Online Boutique (design set), 120 cases, five-minute detection
+window, configuration not tuned. Intervals are 95% cluster bootstraps.</p>{{q3_table}}</div>
+<p>The gate does the work: it cuts false issues about {{q3_false_cut}}-fold ({{q3_false_raw}} to {{q3_false_gate}}
+per hour) at the same detection rate. The small model barely changes anything: it answered "open" to
+{{q3_open_share}} of what the gate passed, with usable answers in {{q3_usable}} calls at a median of {{q3_latency}}.
+That is a finding, not a failure to report: on a laptop, a 3B model is a rubber stamp for a good gate.</p>
+
 <h2>The engine</h2>
 <p>Logs arrive over OTLP/HTTP and are acknowledged only after an fsync of the write-ahead log. Templates are mined
 online per service and versioned, so every stored line rebuilds byte for byte. Parquet segments, rollups and the
@@ -176,6 +190,7 @@ see a failure.</p>
 <tr><td>Acknowledged records</td><td class=n>{{crash_records}}</td></tr>
 <tr><td>Lost</td><td class=n><strong>{{crash_lost}}</strong></td></tr>
 <tr><td>Duplicated</td><td class=n><strong>{{crash_dup}}</strong></td></tr>
+<tr><td>Stock OpenTelemetry Collector (default exporter)</td><td class=n>{{collector_received}} of {{collector_lines}} lines, {{collector_dup}} duplicated</td></tr>
 <tr><td>OTLP/HTTP throughput, 8 senders</td><td class=n>{{tp_http}} records/s</td></tr>
 <tr><td>Ack latency per 1,000-record batch</td><td class=n>p50 {{tp_p50}} ms, p99 {{tp_p99}} ms</td></tr>
 <tr><td>Machine</td><td class=n>{{machine}}</td></tr>
@@ -188,10 +203,10 @@ in about ten seconds, with no Docker, no download and no model.</p>
 
 <h2>What's next</h2>
 <ul>
-<li>Sift v2, pre-registered before the third application is opened: new templates scored against the service's own
+<li>Sift v2, frozen on the design set (Avg@5 {{v2_dev_avg5}} there): new templates scored against the service's own
 rate before the alarm.</li>
-<li>Investigate before alert: sensors fire, a deterministic gate re-measures, a local model decides whether to open an
-issue, on forward-only replay with no access to the injection time.</li>
+<li>The third application (Train Ticket), opened once for v1, v2 and the investigate-before-alert rungs, with
+predictions committed first.</li>
 <li>Cost: lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.</li>
 </ul>
 

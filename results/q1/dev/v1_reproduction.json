@@ -1,0 +1,6 @@
+{
+  "check": "v1 rankings re-run on Dev after the v2 code change (flag off) and the empty-store fix",
+  "rows": 240,
+  "rankings_changed": 0,
+  "compared_with": "results/q1/dev/sift.jsonl at commit 60b2a67"
+}

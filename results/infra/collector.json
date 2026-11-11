@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "collector": "otel/opentelemetry-collector-contrib:0.165.0",
+  "exporter": "otlphttp with default settings (protobuf, gzip compression, retries on)",
+  "linesWritten": 32531,
+  "recordsReceived": 32531,
+  "missing": 0,
+  "duplicated": 0,
+  "linesTrimmedByCollector": 702,
+  "note": "filelog trims trailing whitespace by default; lines are compared to what the Collector sends",
+  "serviceName": [
+    "collector-demo"
+  ],
+  "seconds": 6,
+  "collectorErrors": [],
+  "measuredAt": "2026-11-11T08:41:22.453Z"
+}

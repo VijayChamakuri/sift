@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 6218233,
+    "clickhouse-zstd3": 3307006,
+    "gzip-6": 3237315,
+    "zstd-19": 1959639,
+    "zstd-3": 3350299
+  },
+  "grouping": {
+    "ga_content": 0.8567,
+    "ga_full_line": 0.2462,
+    "lines": 429988,
+    "templates_content": 562,
+    "templates_full_line": 3003,
+    "true_templates": 74
+  },
+  "seconds": 23.6,
+  "sift": {
+    "ingestSeconds": 7.2,
+    "lines": 429988,
+    "linesReadBack": 429988,
+    "lossless": true,
+    "name": "HPC",
+    "rawBytes": 32610624,
+    "sizes": {
+      "manifest": 197,
+      "rollups": 9409,
+      "segments": 5010484,
+      "templates": 557801,
+      "wal": 56698570
+    },
+    "storeBytes": 5577891,
+    "templates": 3003,
+    "verbatimLines": 0
+  },
+  "system": "HPC"
+}

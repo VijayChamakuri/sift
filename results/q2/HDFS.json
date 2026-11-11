@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 304097621,
+    "clickhouse-zstd3": 161542215,
+    "gzip-6": 155395277,
+    "zstd-19": 98225220,
+    "zstd-3": 151665399
+  },
+  "grouping": {
+    "ga_content": 0.9994,
+    "ga_full_line": 0.9994,
+    "lines": 11167740,
+    "templates_content": 45,
+    "templates_full_line": 42,
+    "true_templates": 46
+  },
+  "seconds": 291.3,
+  "sift": {
+    "ingestSeconds": 61.4,
+    "lines": 11167740,
+    "linesReadBack": 11167740,
+    "lossless": true,
+    "name": "HDFS",
+    "rawBytes": 1565682217,
+    "sizes": {
+      "manifest": 471,
+      "rollups": 12021,
+      "segments": 193955478,
+      "templates": 10895,
+      "wal": 2202271906
+    },
+    "storeBytes": 193978865,
+    "templates": 42,
+    "verbatimLines": 0
+  },
+  "system": "HDFS"
+}

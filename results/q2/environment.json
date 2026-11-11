@@ -1,0 +1,11 @@
+{
+  "clickhouse": "ClickHouse local version 26.3.60.2 (official build).",
+  "data": "Loghub-2.0, Zenodo record 8275861, CC-BY-4.0",
+  "machine": "arm64 macOS-27.2-arm64-arm-64bit",
+  "zstandard": "0.25.0",
+  "zstd_library": [
+    1,
+    5,
+    7
+  ]
+}

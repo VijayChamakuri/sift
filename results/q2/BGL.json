@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 123139718,
+    "clickhouse-zstd3": 66483675,
+    "gzip-6": 61267114,
+    "zstd-19": 33308716,
+    "zstd-3": 68428856
+  },
+  "grouping": {
+    "ga_content": 0.5547,
+    "ga_full_line": 0.8866,
+    "lines": 4631261,
+    "templates_content": 2826,
+    "templates_full_line": 2600,
+    "true_templates": 320
+  },
+  "seconds": 410.4,
+  "sift": {
+    "ingestSeconds": 329.9,
+    "lines": 4631261,
+    "linesReadBack": 4631261,
+    "lossless": true,
+    "name": "BGL",
+    "rawBytes": 719447452,
+    "sizes": {
+      "manifest": 300,
+      "rollups": 19617,
+      "segments": 81593842,
+      "templates": 396104,
+      "wal": 978810010
+    },
+    "storeBytes": 82009863,
+    "templates": 2600,
+    "verbatimLines": 0
+  },
+  "system": "BGL"
+}

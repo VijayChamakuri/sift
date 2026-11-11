@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 361291,
+    "clickhouse-zstd3": 194491,
+    "gzip-6": 215232,
+    "zstd-19": 111500,
+    "zstd-3": 179293
+  },
+  "grouping": {
+    "ga_content": 0.8066,
+    "ga_full_line": 0.0048,
+    "lines": 23921,
+    "templates_content": 630,
+    "templates_full_line": 1364,
+    "true_templates": 338
+  },
+  "seconds": 7.3,
+  "sift": {
+    "ingestSeconds": 0.7,
+    "lines": 23921,
+    "linesReadBack": 23921,
+    "lossless": true,
+    "name": "Linux",
+    "rawBytes": 2135395,
+    "sizes": {
+      "manifest": 196,
+      "rollups": 4714,
+      "segments": 297336,
+      "templates": 245389,
+      "wal": 3522948
+    },
+    "storeBytes": 547635,
+    "templates": 1364,
+    "verbatimLines": 0
+  },
+  "system": "Linux"
+}

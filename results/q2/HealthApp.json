@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 3526952,
+    "clickhouse-zstd3": 2130132,
+    "gzip-6": 1983335,
+    "zstd-19": 1256985,
+    "zstd-3": 2053580
+  },
+  "grouping": {
+    "ga_content": 0.4436,
+    "ga_full_line": 0.0125,
+    "lines": 212394,
+    "templates_content": 5001,
+    "templates_full_line": 5001,
+    "true_templates": 156
+  },
+  "seconds": 400.8,
+  "sift": {
+    "ingestSeconds": 356.8,
+    "lines": 212394,
+    "linesReadBack": 212394,
+    "lossless": true,
+    "name": "HealthApp",
+    "rawBytes": 20483511,
+    "sizes": {
+      "manifest": 197,
+      "rollups": 13919,
+      "segments": 3250501,
+      "templates": 795496,
+      "wal": 33653030
+    },
+    "storeBytes": 4060113,
+    "templates": 5001,
+    "verbatimLines": 142886
+  },
+  "system": "HealthApp"
+}

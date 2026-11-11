@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 2256822,
+    "clickhouse-zstd3": 1124349,
+    "gzip-6": 1292213,
+    "zstd-19": 566465,
+    "zstd-3": 877046
+  },
+  "grouping": {
+    "ga_content": 0.7886,
+    "ga_full_line": 0.7443,
+    "lines": 100314,
+    "templates_content": 2129,
+    "templates_full_line": 1248,
+    "true_templates": 626
+  },
+  "seconds": 36.2,
+  "sift": {
+    "ingestSeconds": 11,
+    "lines": 100314,
+    "linesReadBack": 100314,
+    "lossless": true,
+    "name": "Mac",
+    "rawBytes": 15437759,
+    "sizes": {
+      "manifest": 197,
+      "rollups": 6362,
+      "segments": 1281241,
+      "templates": 444992,
+      "wal": 21060874
+    },
+    "storeBytes": 1732792,
+    "templates": 1248,
+    "verbatimLines": 0
+  },
+  "system": "Mac"
+}

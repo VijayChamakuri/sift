@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 920285,
+    "clickhouse-zstd3": 481162,
+    "gzip-6": 455301,
+    "zstd-19": 266377,
+    "zstd-3": 448336
+  },
+  "grouping": {
+    "ga_content": 0.9995,
+    "ga_full_line": 0.9555,
+    "lines": 74273,
+    "templates_content": 94,
+    "templates_full_line": 53,
+    "true_templates": 89
+  },
+  "seconds": 63.8,
+  "sift": {
+    "ingestSeconds": 3.9,
+    "lines": 74273,
+    "linesReadBack": 74273,
+    "lossless": true,
+    "name": "Zookeeper",
+    "rawBytes": 10330307,
+    "sizes": {
+      "manifest": 197,
+      "rollups": 1424,
+      "segments": 716905,
+      "templates": 16588,
+      "wal": 14935437
+    },
+    "storeBytes": 735114,
+    "templates": 53,
+    "verbatimLines": 0
+  },
+  "system": "Zookeeper"
+}

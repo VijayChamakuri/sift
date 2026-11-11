@@ -5,7 +5,8 @@ engine (OTLP intake, write-ahead log, online template mining, Parquet storage, r
 ranking) and a pre-registered measurement of that question on injected faults in real
 microservice systems.
 
-**The first test says: not yet, and it says why.** Sift was designed and tuned on Online
+**Two pre-registered tests say: logs get part of the way, and metrics still win by a wide
+margin.** Sift was designed and tuned on Online
 Boutique, where it reached Avg@5 0.533 from logs alone, against 0.252 for
 the published multi-source method given the same logs. Its configuration and seven predictions
 were then committed, and a second system, Sock Shop, was opened once. There, the frozen Sift
@@ -14,9 +15,14 @@ reached Avg@5 **0.443** (AC@1 0.075) and ranked `front-end` first in
 given metrics, 0.770. Paired difference, Sift minus that method on logs:
 -0.112 (95% CI [-0.18, -0.04]). 3 of the seven predictions held.
 
-The reason is specific and fixable, and the fix will be pre-registered before the next system is opened (below): Sift
-counts every template it has never seen as evidence, and Sock Shop's front-end writes new,
-one-off lines all the time, faults or not. Online Boutique's services rarely do.
+The reason was specific: Sift counted every template it had never seen as evidence, and Sock
+Shop's front-end writes new, one-off lines all the time, faults or not. Sift v2 scores a service's
+new templates against its own rate just before the alarm. v2, the unchanged v1 and seven new
+predictions were committed and tagged, and a third system, **Train Ticket, was opened once**.
+There v2 reached Avg@5 **0.403** against 0.348 for v1 (paired difference
++0.055, 95% CI [+0.003, +0.105]) and 0.343 for the published method on the
+same logs; given metrics, BARO reached 0.853. 6 of the seven
+Test B predictions held.
 
 ### At a glance
 
@@ -26,8 +32,9 @@ one-off lines all the time, faults or not. Online Boutique's services rarely do.
 | **Durability** | 100 SIGKILL crash runs, 20,493,200 acknowledged records: **0 lost, 0 duplicated**. The same harness catches a deliberately broken recovery. |
 | **Throughput** | 315,648 records/s over OTLP/HTTP, ack p50 19.8 ms / p99 253.6 ms, on a laptop (Apple M2, 8 GB RAM, Node 24.19.0). |
 | **Question** | Can logs alone rank the root-cause service? Pre-registered, three-system design, test sets opened once. |
-| **Answer so far** | Not reliably: the Dev design did not transfer to the first test system (3 of 7 predictions held). Cause diagnosed; the fix will be pre-registered before the next system is opened. |
+| **Answer so far** | Partly. Test A (Sock Shop): the Dev design did not transfer (3 of 7 predictions held). Test B (Train Ticket): the pre-registered fix beat v1 and the published logs-only method, and stayed far below metrics (0.403 vs 0.853 Avg@5; 6 of 7 predictions held). |
 | **Agent** | Sensors fire on logs as they arrive; a deterministic gate re-measures; a local model (mlx-community/Qwen2.5-3B-Instruct-4bit, via the Vercel AI SDK) decides open or hold; each investigation runs as a Temporal workflow and opens at most one issue in Postgres. On Dev the gate cut false issues from 52.54 to 4.0 per hour; the model added little (99.4% "open"). |
+| **Storage** | Lossless on 13 of 13 Loghub-2.0 systems, but 9.1× smaller than raw, against 20.6× for zstd -19: not a strength yet; likely causes and fixes listed below. |
 | **Interop** | A stock OpenTelemetry Collector (otel/opentelemetry-collector-contrib:0.165.0, default exporter: protobuf, gzip, retries) delivered 32,531 of 32,531 lines, 0 duplicated. |
 | **Try it** | `pnpm install && pnpm demo`: a real incident, end to end, in about ten seconds. |
 
@@ -42,7 +49,7 @@ one-off lines all the time, faults or not. Online Boutique's services rarely do.
 
 | Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |
 |---|---|---:|---:|---:|---:|---:|---:|
-| **Sift (logs)** | logs | 0.075 | 0.608 | 0.443 | [0.34, 0.55] | +0.171 | 0 |
+| **Sift v1 (logs)** | logs | 0.075 | 0.608 | 0.443 | [0.34, 0.55] | +0.171 | 0 |
 | Error-surge control (logs) | logs | 0.166 | 0.511 | 0.456 | [0.37, 0.55] | +0.183 | 0 |
 | Multi-source BARO, logs only | logs | 0.308 | 0.592 | 0.555 | [0.44, 0.67] | +0.282 | 0 |
 | Multi-source BARO, traces only | traces | 0.091 | 0.273 | 0.273 | [0.27, 0.27] | +0.000 | 0 |
@@ -79,7 +86,7 @@ injection restarted a container). In Sock Shop, none did.
 
 ### Where logs work and where they do not
 
-| Fault | Cases | Sift (logs) | Multi-source BARO, logs only | Error-surge control (logs) | Multi-source BARO, metrics only | Multi-source BARO, traces only |
+| Fault | Cases | Sift v1 (logs) | Multi-source BARO, logs only | Error-surge control (logs) | Multi-source BARO, metrics only | Multi-source BARO, traces only |
 |---|---:|---:|---:|---:|---:|---:|
 | code-level (RE3) | 30 | 0.720 | 0.920 | 0.674 | 0.747 | 0.273 |
 | loss | 15 | 0.573 | 0.693 | 0.639 | 0.787 | 0.273 |
@@ -107,13 +114,77 @@ service is the answer:
 
 | Method | Most often ranked first | Share of cases ranked first | Share of cases it is the answer |
 |---|---|---:|---:|
-| Sift (logs) | `front-end` | 0.99 | 0.07 |
+| Sift v1 (logs) | `front-end` | 0.99 | 0.07 |
 | Error-surge control (logs) | `front-end` | 0.43 | 0.07 |
 | Multi-source BARO, logs only | `front-end` | 0.42 | 0.07 |
 | Multi-source BARO, traces only | `None` | 0.00 | 0.00 |
 | Multi-source BARO, metrics only | `session` | 0.88 | 0.00 |
 | Multi-source BARO, all signals | `session` | 0.88 | 0.00 |
 | BARO (metrics) | `session` | 0.88 | 0.00 |
+
+## Test B: Train Ticket, opened once
+
+Committed and tagged (`q3-frozen`) before any Train Ticket case was read: Sift v1 unchanged, Sift
+v2, the same baselines and scoring, the agent's configuration, and seven predictions
+([PREREGISTRATION.md](PREREGISTRATION.md), addendum). 120 cases.
+
+| Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |
+|---|---|---:|---:|---:|---:|---:|---:|
+| **Sift v1 (logs)** | logs | 0.292 | 0.358 | 0.348 | [0.21, 0.49] | +0.304 | 1 |
+| Sift v2 (logs) | logs | 0.308 | 0.408 | 0.403 | [0.28, 0.54] | +0.359 | 1 |
+| Error-surge control (logs) | logs | 0.075 | 0.167 | 0.194 | [0.12, 0.28] | +0.150 | 1 |
+| Multi-source BARO, logs only | logs | 0.275 | 0.359 | 0.343 | [0.21, 0.48] | +0.299 | 1 |
+| Multi-source BARO, traces only | traces | 0.492 | 0.867 | 0.797 | [0.73, 0.85] | +0.753 | 0 |
+| Multi-source BARO, metrics only | metrics | 0.750 | 0.867 | 0.853 | [0.78, 0.92] | +0.809 | 0 |
+| Multi-source BARO, all signals | all | 0.750 | 0.875 | 0.870 | [0.80, 0.93] | +0.826 | 1 |
+| BARO (metrics) | metrics | 0.758 | 0.875 | 0.853 | [0.78, 0.92] | +0.809 | 0 |
+
+A random ranking over the same candidates scores 0.044. 1 case ships with
+no log file in RCAEval; every logs-only method scores it as a miss. RCAEval's own code fails on one
+other case for two baseline variants; also a miss.
+
+| Prediction (addendum, committed and tagged before Test B was read) | Outcome | Evidence |
+|---|---|---|
+| Sift v2 beats Sift v1 on Avg@5 (paired 95% CI above zero) | held | 0.403 vs 0.348, difference +0.055 [+0.003, +0.105] |
+| Sift v2 ranks no single service first in more than half of the cases | held | `ts-order-other-service` first in 14% |
+| Sift v2 stays below metric-based BARO on Avg@5 | held | 0.403 vs 0.853 |
+| Sift v2 beats logs-only multi-source BARO (paired 95% CI above zero) | held | difference +0.060 [+0.013, +0.115] |
+| The gate cuts false issues per hour at least five-fold and loses at most 0.05 of any-service recall | **failed** | 108.81 to 43.55 per hour (2.5-fold); recall 0.692 to 0.792 |
+| The model rung's right-service recall is within 0.05 of the gate's | held | 0.117 vs 0.117 (+0.000) |
+| The model answers "open" to at least 90% of the gate-passed signals it sees | held | 99.3% of 922 calls |
+
+6 of 7 predictions held.
+
+- **The fix worked, modestly.** v2 beat v1 by +0.055 Avg@5 (95% CI [+0.003, +0.105]); the
+  interval clears zero, but not by much. v1 alone ties the published method on the same logs on
+  Avg@5 (+0.005, 95% CI [-0.035, +0.048]), and v1's AC@1 is 0.292 against v2's 0.308.
+- **Metrics still win by a wide margin on this system**: 0.853 Avg@5 for metric BARO
+  against 0.403 for the best logs-only method.
+
+#### Where logs work and where they do not (Test B)
+
+| Fault | Cases | Sift v1 (logs) | Multi-source BARO, logs only | Error-surge control (logs) | Multi-source BARO, metrics only | Multi-source BARO, traces only |
+|---|---:|---:|---:|---:|---:|---:|
+| code-level (RE3) | 30 | 1.000 | 0.987 | 0.354 | 0.940 | 0.927 |
+| loss | 15 | 0.147 | 0.149 | 0.188 | 0.613 | 0.573 |
+| socket | 15 | 0.000 | 0.054 | 0.121 | 0.813 | 0.853 |
+| delay | 15 | 0.173 | 0.054 | 0.004 | 0.653 | 0.867 |
+| cpu | 15 | 0.240 | 0.231 | 0.227 | 0.880 | 0.840 |
+| mem | 15 | 0.227 | 0.175 | 0.093 | 0.987 | 0.693 |
+| disk | 15 | 0.000 | 0.109 | 0.213 | 1.000 | 0.693 |
+
+#### Default-pick check (Test B)
+
+| Method | Most often ranked first | Share of cases ranked first | Share of cases it is the answer |
+|---|---|---:|---:|
+| Sift v1 (logs) | `ts-order-other-service` | 0.15 | 0.00 |
+| Sift v2 (logs) | `ts-order-other-service` | 0.14 | 0.00 |
+| Error-surge control (logs) | `ts-travel-service` | 0.15 | 0.15 |
+| Multi-source BARO, logs only | `ts-order-other-service` | 0.31 | 0.00 |
+| Multi-source BARO, traces only | `ts-route-service` | 0.19 | 0.28 |
+| Multi-source BARO, metrics only | `ts-route-service` | 0.25 | 0.28 |
+| Multi-source BARO, all signals | `ts-route-service` | 0.25 | 0.28 |
+| BARO (metrics) | `ts-route-service` | 0.27 | 0.28 |
 
 ## Investigate before alert (the agent)
 
@@ -155,8 +226,62 @@ logs ──▶ sensors (rate, error surge, new error template; per service, Pois
 - **Logs see about half the faults within five minutes, and rarely name the right service
   first**: the same CPU, memory and disk blind spot as the ranking results.
 
-Pre-registered for Test B: the same configuration, untouched, and predictions for each rung
-([PREREGISTRATION.md](PREREGISTRATION.md), addendum).
+#### Test B (Train Ticket, opened once, same configuration)
+
+| Rung | Detected, any service | Detected, right service | Median delay | False issues per hour | Issues per case |
+|---|---:|---:|---:|---:|---:|
+| Raw sensors | 0.692 [0.59, 0.79] | 0.117 [0.03, 0.23] | 59 s | 108.81 | 18.48 |
+| + deterministic gate | 0.792 [0.71, 0.87] | 0.117 [0.03, 0.23] | 84 s | 43.55 | 10.54 |
+| + local model | 0.792 [0.71, 0.87] | 0.117 [0.03, 0.23] | 84 s | 43.42 | 10.54 |
+
+On Train Ticket the gate took false issues from 108.81 to 43.55 per monitored hour, while detection of any service went from 0.692 to 0.792. Right-service detection was 0.117 with the gate and 0.117 with the model, which answered "open" to 99.3% of the 922 gate-passed signals it saw.
+
+Detection with the gate can exceed detection by the raw sensors because, by the pre-registered rule,
+repeat issues for the same service and sensor count once: a false issue opened before the fault hides
+a real one after it, and the gate removes many of those early false issues. Train Ticket is far
+noisier than the design system (raw sensors open 108.81 false issues per hour), and the
+gate's cut fell short of the predicted five-fold.
+
+## What logs cost to keep (Loghub-2.0)
+
+Loghub-2.0 (Jiang et al., ISSTA 2024; 13 systems, 33,814,878 lines, 4.17 GB raw,
+ground-truth templates). Each system's raw file goes through Sift's store and through general-purpose
+compressors and ClickHouse; every stored line is then rebuilt and the SHA-256 of the rebuilt stream
+compared with the input. Sizes in MB.
+
+| System | Lines | Raw MB | gzip -6 | zstd -19 | ClickHouse ZSTD(3) | Sift store | Sift WAL (not trimmed) | Lossless | Grouping accuracy, message | Grouping accuracy, full line |
+|---|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|
+| Apache | 51,978 | 5.0 | 0.3 | 0.2 | 0.3 | 0.6 | 8.0 | yes | 1.000 | 0.003 |
+| BGL | 4,631,261 | 719.4 | 61.3 | 33.3 | 66.5 | 82.0 | 978.8 | yes | 0.555 | 0.887 |
+| HDFS | 11,167,740 | 1,565.7 | 155.4 | 98.2 | 161.5 | 194.0 | 2,202.3 | yes | 0.999 | 0.999 |
+| HPC | 429,988 | 32.6 | 3.2 | 2.0 | 3.3 | 5.6 | 56.7 | yes | 0.857 | 0.246 |
+| Hadoop | 179,993 | 31.9 | 2.3 | 1.1 | 2.2 | 2.6 | 42.5 | yes | 0.933 | 0.728 |
+| HealthApp | 212,394 | 20.5 | 2.0 | 1.3 | 2.1 | 4.1 | 33.7 | yes | 0.444 | 0.013 |
+| Linux | 23,921 | 2.1 | 0.2 | 0.1 | 0.2 | 0.5 | 3.5 | yes | 0.807 | 0.005 |
+| Mac | 100,314 | 15.4 | 1.3 | 0.6 | 1.1 | 1.7 | 21.1 | yes | 0.789 | 0.744 |
+| OpenSSH | 638,947 | 70.5 | 4.5 | 2.9 | 5.0 | 7.2 | 108.9 | yes | 0.780 | 0.000 |
+| OpenStack | 207,632 | 61.4 | 5.3 | 3.8 | 5.2 | 5.8 | 74.5 | yes | 0.891 | 0.318 |
+| Proxifier | 21,320 | 2.5 | 0.2 | 0.1 | 0.2 | 0.3 | 3.8 | yes | 0.015 | 0.001 |
+| Spark | 16,075,117 | 1,629.4 | 94.3 | 58.9 | 105.3 | 154.8 | 2,561.8 | yes | 0.889 | 0.888 |
+| Zookeeper | 74,273 | 10.3 | 0.5 | 0.3 | 0.5 | 0.7 | 14.9 | yes | 1.000 | 0.956 |
+| **All 13** | 33,814,878 | 4,166.8 | 330.7 | 202.7 | 353.5 | 459.9 | 6,110.5 | | | |
+
+- **Lossless: 13 of 13 systems** rebuilt byte for byte.
+- **Sift's store is not cheap yet.** Over all systems it is 9.1× smaller than raw, against
+  12.6× for gzip, 11.8× for ClickHouse with ZSTD(3) and 20.6× for
+  zstd -19. Likely reasons, not yet isolated: every line carries its own header (date, time, host),
+  which becomes per-line parameters, and parameters are stored as JSON text.
+- **Grouping accuracy** (Loghub's definition) of the online miner: 0.766 on the benchmark's
+  message contents, 0.445 on the full lines Sift stores, averaged over systems. The miner was
+  built for OTLP bodies, where the timestamp and severity arrive as separate fields.
+- **The Sift WAL is not trimmed after a commit**, so on disk the store currently keeps a second,
+  larger-than-raw copy until it is deleted. Trimming it is a small change; it is reported, not hidden.
+- Thunderbird was not run in full: on its first 200,000 lines Sift ingested 1,695 lines/s with 4,698 templates, against a median of 34,652 lines/s over the systems run in full (slowest: HealthApp, 595 lines/s), so the full file would take hours. Both slow systems approach the miner's cap of 5,000 templates per service, where matching a line scans many clusters.
+
+What would change the result, in order: parse the header into fields at intake (the Collector's
+regex parser does this), store parameters as typed columns instead of JSON text, trim the WAL after
+each commit, and index the miner's clusters so matching does not slow down as a service's template
+count grows.
 
 ## Try it
 
@@ -246,8 +371,10 @@ machines it takes. The shape it would grow into:
 - No authentication; local use only.
 - The language model is a 3B model on a laptop; it rubber-stamps the gate. A stronger model, or a
   task it is better suited to (naming the upstream service from callers' errors), is open work.
-- Results cover three RCAEval systems with injected faults; Test B is still sealed.
+- Results cover three RCAEval systems with injected faults, each opened for testing once.
 - Throughput is one run on one laptop; the p99 ack latency has not been profiled yet.
+- The store is larger than gzip on raw log files (Loghub-2.0 table above); storage cost is not a
+  strength yet.
 
 ## Durability
 
@@ -280,10 +407,11 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 ## Method
 
 - **Data:** RCAEval (Pham et al., WWW 2025), pinned at commit `90b63a4`. Dev: Online Boutique
-  (RE2-OB, RE3-OB). Test A: Sock Shop (RE2-SS, RE3-SS), opened once. Test B: Train Ticket,
-  sealed until the next phase. Sift reads each case through an anonymised path, because RCAEval
+  (RE2-OB, RE3-OB). Test A: Sock Shop (RE2-SS, RE3-SS), opened once. Test B: Train Ticket (RE2-TT,
+  RE3-TT), opened once after the `q3-frozen` tag. Sift reads each case through an anonymised path, because RCAEval
   directory names contain the answer; a test enforces it.
-- **Pre-registration:** [PREREGISTRATION.md](PREREGISTRATION.md), committed before Test A was read.
+- **Pre-registration:** [PREREGISTRATION.md](PREREGISTRATION.md), committed before Test A was read;
+  its addendum committed and tagged `q3-frozen` before Test B was read.
 - **Candidates:** RCAEval's own candidate rule, the same for every method.
 - **Coverage limit:** some root-cause services barely log. In Dev, `productcatalogservice` writes
   any log line in only 3/18 of its root-cause cases, so a logs-only method can only find
@@ -293,12 +421,18 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
   recorded an empty ranking as a failure, which scored Sock Shop's traces-only row as 0 instead of
   a random ranking; fixed and re-run. The diagnosis of Sift's `front-end` failure above is
   post-hoc analysis of Test A.
+- **Test B run notes:** v2 was chosen on Dev (Avg@5 0.558, AC@1 0.392, a
+  logged grid of 18 settings spanning 0.517 to 0.558). v1 is unchanged:
+  re-running it on Dev after the v2 change gives 0 of 240 changed rankings. The baselines were
+  run twice on Test B with the same code and settings: the first run shared a cache folder with a
+  second, stale process and wrote a corrupt file, so it was discarded before scoring. The agent
+  run was interrupted once by a machine restart before it wrote any output, and was started again.
 
 ### Dev results (design set)
 
 | Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |
 |---|---|---:|---:|---:|---:|---:|---:|
-| **Sift (logs)** | logs | 0.375 | 0.542 | 0.533 | [0.41, 0.66] | +0.283 | 0 |
+| **Sift v1 (logs)** | logs | 0.375 | 0.542 | 0.533 | [0.41, 0.66] | +0.283 | 0 |
 | Sift v2 (logs) | logs | 0.392 | 0.567 | 0.558 | [0.43, 0.68] | +0.308 | 0 |
 | Error-surge control (logs) | logs | 0.074 | 0.418 | 0.373 | [0.29, 0.46] | +0.123 | 0 |
 | Multi-source BARO, logs only | logs | 0.150 | 0.250 | 0.252 | [0.15, 0.37] | +0.002 | 0 |
@@ -309,7 +443,7 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 
 | Method | Most often ranked first | Share of cases ranked first | Share of cases it is the answer |
 |---|---|---:|---:|
-| Sift (logs) | `checkoutservice` | 0.24 | 0.15 |
+| Sift v1 (logs) | `checkoutservice` | 0.24 | 0.15 |
 | Sift v2 (logs) | `checkoutservice` | 0.25 | 0.15 |
 | Error-surge control (logs) | `frontend` | 0.36 | 0.00 |
 | Multi-source BARO, logs only | `recommendationservice` | 0.74 | 0.15 |
@@ -327,12 +461,11 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 
 ## What's next
 
-- **Test B (Train Ticket), pre-registered, not yet opened:** Sift v1, Sift v2 (new templates
-  scored against the service's own rate before the alarm; Dev Avg@5 0.558, AC@1
-  0.392, from a logged grid of 18 settings spanning 0.517 to 0.558)
-  and the investigate-before-alert rungs, all scored once. v1 is unchanged: re-running it on Dev
-  after the v2 change gives 0 of 240 changed rankings.
-- **Cost:** lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.
+- **Naming the right service, not just noticing:** the agent detects about half the faults but
+  rarely names the root cause; reading callers' errors to name the upstream service is the next
+  measurable step.
+- **Cost, second round:** the four changes listed under "What logs cost to keep", then the same table
+  again, plus query latency against ClickHouse and CLP.
 
 ## Reproduce
 

@@ -22,7 +22,7 @@ from .score_q1 import score_split
 FIG = ROOT / "docs" / "figures"
 TEMPLATE = ROOT / "docs" / "README.template.md"
 NAMES = {
-    "sift": "Sift (logs)",
+    "sift": "Sift v1 (logs)",
     "sift_v2": "Sift v2 (logs)",
     "control:error-surge": "Error-surge control (logs)",
     "mmbaro:logs": "Multi-source BARO, logs only",
@@ -41,6 +41,11 @@ FAULT_GROUPS = [
     ("mem", {"mem"}),
     ("disk", {"disk"}),
 ]
+
+
+def ci3(c: list[float] | tuple[float, float]) -> str:
+    """Interval of a paired difference, to three places so a bound near zero shows its sign."""
+    return f"[{c[0]:+.3f}, {c[1]:+.3f}]"
 
 
 def f3(x: float) -> str:
@@ -258,7 +263,7 @@ def test_b_checks(tb: dict, q3b: dict) -> list[tuple[str, bool, str]]:
         (
             "Sift v2 beats Sift v1 on Avg@5 (paired 95% CI above zero)",
             p21["lo"] > 0,
-            f"{f3(v2['avg5'])} vs {f3(v1['avg5'])}, difference {p21['mean']:+.3f} {ci((p21['lo'], p21['hi']))}",
+            f"{f3(v2['avg5'])} vs {f3(v1['avg5'])}, difference {p21['mean']:+.3f} {ci3((p21['lo'], p21['hi']))}",
         ),
         (
             "Sift v2 ranks no single service first in more than half of the cases",
@@ -273,7 +278,7 @@ def test_b_checks(tb: dict, q3b: dict) -> list[tuple[str, bool, str]]:
         (
             "Sift v2 beats logs-only multi-source BARO (paired 95% CI above zero)",
             p2l["lo"] > 0,
-            f"difference {p2l['mean']:+.3f} {ci((p2l['lo'], p2l['hi']))}",
+            f"difference {p2l['mean']:+.3f} {ci3((p2l['lo'], p2l['hi']))}",
         ),
         (
             "The gate cuts false issues per hour at least five-fold and loses at most 0.05 of any-service recall",
@@ -319,6 +324,143 @@ def render(template: str, values: dict[str, str]) -> str:
     return re.sub(r"{{(\w+)}}", lambda m: values[m.group(1)], template)
 
 
+def test_b_values(tb: dict | None) -> dict[str, str]:
+    """Everything the README says about Test B, or nothing if it has not been run."""
+    q3_path = RESULTS / "q3" / "test_b" / "summary.json"
+    if tb is None or not q3_path.exists():
+        return {}
+    q3b = json.loads(q3_path.read_text())
+    checks = test_b_checks(tb, q3b)
+    m = tb["methods"]
+    no_logs = sum(
+        1
+        for line in (RESULTS / "q1" / "test_b" / "sift.jsonl").read_text().splitlines()
+        if (r := json.loads(line))["method"] == "sift" and r["error"] and "no logs.parquet" in str(r["error"])
+    )
+    raw, gate_, mdl = (q3b["rungs"][r] for r in ("raw", "gate", "model"))
+    p21 = tb["paired"]["sift_v2 - sift"]
+    return {
+        "tb_table": method_table(tb, ORDER),
+        "tb_concentration_table": concentration_table(tb),
+        "tb_fault_table": fault_table(grouped_faults(tb)),
+        "tb_predictions_table": checks_table(
+            checks, "Prediction (addendum, committed and tagged before Test B was read)"
+        ),
+        "tb_predictions_held": str(sum(ok for _, ok, _ in checks)),
+        "tb_q3_table": q3_table(q3b),
+        "tb_cases": str(m["sift"]["cases"]),
+        "tb_no_logs": str(no_logs),
+        "tb_v1_avg5": f3(m["sift"]["avg5"]),
+        "tb_v2_avg5": f3(m["sift_v2"]["avg5"]),
+        "tb_v1_ac1": f3(m["sift"]["ac1"]),
+        "tb_v2_ac1": f3(m["sift_v2"]["ac1"]),
+        "tb_v2_v1_diff": f"{p21['mean']:+.3f}",
+        "tb_v2_v1_ci": ci3((p21["lo"], p21["hi"])),
+        "tb_v1_logs_diff": f"{tb['paired']['sift - mmbaro:logs']['mean']:+.3f}",
+        "tb_v1_logs_ci": ci3(
+            (tb["paired"]["sift - mmbaro:logs"]["lo"], tb["paired"]["sift - mmbaro:logs"]["hi"])
+        ),
+        "tb_logs_avg5": f3(m["mmbaro:logs"]["avg5"]),
+        "tb_baro_avg5": f3(m["baro"]["avg5"]),
+        "tb_baro_ac1": f3(m["baro"]["ac1"]),
+        "tb_chance_avg5": f3(m["sift"]["chance_avg5"]),
+        "tb_q3_false_raw": str(raw["false_issues_per_hour"]),
+        "tb_q3_false_gate": str(gate_["false_issues_per_hour"]),
+        "tb_q3_recall_any": f3(gate_["recall_any"]),
+        "tb_q3_recall_correct_gate": f3(gate_["recall_correct"]),
+        "tb_q3_recall_correct_model": f3(mdl["recall_correct"]),
+        "tb_q3_open_share": f"{q3b['model']['open_share']:.1%}"
+        if q3b["model"]["open_share"] is not None
+        else "–",
+        "tb_q3_text": (
+            f"On Train Ticket the gate took false issues from {raw['false_issues_per_hour']} to "
+            f"{gate_['false_issues_per_hour']} per monitored hour, while detection of any service went from "
+            f"{f3(raw['recall_any'])} to {f3(gate_['recall_any'])}. Right-service detection was "
+            f"{f3(gate_['recall_correct'])} with the gate and {f3(mdl['recall_correct'])} with the model, which "
+            f'answered "open" to '
+            + (f"{q3b['model']['open_share']:.1%}" if q3b["model"]["open_share"] is not None else "none")
+            + f" of the {q3b['model']['calls']} gate-passed signals it saw."
+        ),
+    }
+
+
+def q2_values() -> dict[str, str]:
+    """The Loghub-2.0 storage and grouping table, or a placeholder when Q2 has not been run."""
+    rows_in = [
+        json.loads(p.read_text())
+        for p in sorted((RESULTS / "q2").glob("*.json"))
+        if p.name != "environment.json"
+    ]
+    if not rows_in:
+        return {
+            "q2_table": "Not run yet.",
+            "q2_summary": "not measured yet",
+            "q2_ga_content": "–",
+            "q2_ga_full": "–",
+            "q2_lossless": "–",
+        }
+    mb = lambda b: f"{b / 1e6:,.1f}"  # noqa: E731
+    rows = [
+        "| System | Lines | Raw MB | gzip -6 | zstd -19 | ClickHouse ZSTD(3) | Sift store | Sift WAL (not trimmed) | Lossless | Grouping accuracy, message | Grouping accuracy, full line |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|",
+    ]
+    tot = {"raw": 0, "gzip-6": 0, "zstd-19": 0, "clickhouse-zstd3": 0, "store": 0, "wal": 0, "lines": 0}
+    for r in rows_in:
+        s, c, g = r["sift"], r["compressed"], r["grouping"]
+        rows.append(
+            f"| {r['system']} | {s['lines']:,} | {mb(s['rawBytes'])} | {mb(c['gzip-6'])} | {mb(c['zstd-19'])} "
+            f"| {mb(c['clickhouse-zstd3'])} | {mb(s['storeBytes'])} | {mb(s['sizes']['wal'])} "
+            f"| {'yes' if s['lossless'] else '**no**'} | {g['ga_content']:.3f} | "
+            f"{'–' if g['ga_full_line'] is None else f'{g["ga_full_line"]:.3f}'} |"
+        )
+        for k, v in (
+            ("raw", s["rawBytes"]),
+            ("store", s["storeBytes"]),
+            ("wal", s["sizes"]["wal"]),
+            ("lines", s["lines"]),
+        ):
+            tot[k] += v
+        for k in ("gzip-6", "zstd-19", "clickhouse-zstd3"):
+            tot[k] += c[k]
+    rows.append(
+        f"| **All {len(rows_in)}** | {tot['lines']:,} | {mb(tot['raw'])} | {mb(tot['gzip-6'])} | {mb(tot['zstd-19'])} "
+        f"| {mb(tot['clickhouse-zstd3'])} | {mb(tot['store'])} | {mb(tot['wal'])} | | | |"
+    )
+    ga_c = [r["grouping"]["ga_content"] for r in rows_in]
+    ga_f = [r["grouping"]["ga_full_line"] for r in rows_in if r["grouping"]["ga_full_line"] is not None]
+    ratio = lambda k: tot["raw"] / tot[k]  # noqa: E731
+    probes = [json.loads(p.read_text()) for p in sorted((RESULTS / "q2" / "probes").glob("*.json"))]
+    rates = sorted(
+        r["sift"]["lines"] / r["sift"]["ingestSeconds"] for r in rows_in if r["sift"]["ingestSeconds"]
+    )
+    slowest = min(rows_in, key=lambda r: r["sift"]["lines"] / max(r["sift"]["ingestSeconds"], 1e-9))
+    not_run = "; ".join(
+        f"{p['system']} was not run in full: on its first {p['probe_lines']:,} lines Sift ingested "
+        f"{p['lines_per_second']:,} lines/s with {p['templates']:,} templates, against a median of "
+        f"{rates[len(rates) // 2]:,.0f} lines/s over the systems run in full (slowest: {slowest['system']}, "
+        f"{slowest['sift']['lines'] / slowest['sift']['ingestSeconds']:,.0f} lines/s), so the full file would take hours. "
+        f"Both slow systems approach the miner's cap of 5,000 templates per service, where matching a line "
+        f"scans many clusters"
+        for p in probes
+        if p["system"] not in {r["system"] for r in rows_in}
+    )
+    return {
+        "q2_not_run": (not_run + ".") if not_run else "Every system was run in full.",
+        "q2_table": "\n".join(rows),
+        "q2_systems": str(len(rows_in)),
+        "q2_lines": f"{tot['lines']:,}",
+        "q2_raw_gb": f"{tot['raw'] / 1e9:.2f}",
+        "q2_ratio_store": f"{ratio('store'):.1f}",
+        "q2_ratio_gzip": f"{ratio('gzip-6'):.1f}",
+        "q2_ratio_zstd19": f"{ratio('zstd-19'):.1f}",
+        "q2_ratio_ch": f"{ratio('clickhouse-zstd3'):.1f}",
+        "q2_lossless": f"{sum(r['sift']['lossless'] for r in rows_in)} of {len(rows_in)}",
+        "q2_ga_content": f"{sum(ga_c) / len(ga_c):.3f}",
+        "q2_ga_full": f"{sum(ga_f) / len(ga_f):.3f}" if ga_f else "–",
+        "q2_summary": f"{tot['raw'] / tot['store']:.1f}× smaller than raw, against {ratio('zstd-19'):.1f}× for zstd -19",
+    }
+
+
 def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     splits = [s for s in ("dev", "test_a", "test_b") if (RESULTS / "q1" / s / "sift.jsonl").exists()]
@@ -353,92 +495,97 @@ def main() -> None:
     pdiff = hs["paired"]["sift - mmbaro:logs"]
     s, ml, mm = hs["methods"]["sift"], hs["methods"]["mmbaro:logs"], hs["methods"]["mmbaro:metrics"]
     preds = predictions_table(hs, dev) if head != "dev" else "Test A not run yet."
+    tb_values = test_b_values(summaries.get("test_b"))
     top1 = hs["top1_concentration"]["sift"]
     model = q3["model"]
     raw, gate_, mdl = q3["rungs"]["raw"], q3["rungs"]["gate"], q3["rungs"]["model"]
-    values = {
-        "q3_table": q3_table(q3),
-        "q3_false_raw": str(raw["false_issues_per_hour"]),
-        "q3_false_gate": str(gate_["false_issues_per_hour"]),
-        "q3_false_cut": f"{raw['false_issues_per_hour'] / gate_['false_issues_per_hour']:.0f}"
-        if gate_["false_issues_per_hour"]
-        else "–",
-        "q3_recall_any": f3(gate_["recall_any"]),
-        "q3_recall_correct_gate": f3(gate_["recall_correct"]),
-        "q3_recall_correct_model": f3(mdl["recall_correct"]),
-        "q3_model": str(model["name"]),
-        "q3_calls": str(model["calls"]),
-        "q3_open_share": f"{model['open_share']:.1%}",
-        "q3_renamed": f"{model['renamed_service_share']:.1%}",
-        "q3_usable": f"{model['usable_answers']} of {model['calls']}",
-        "q3_latency": f"{model['median_latency_ms'] / 1000:.1f} s",
-        "q3_tokens_in": f"{model['median_input_tokens']:.0f}",
-        "q3_tokens_out": f"{model['median_output_tokens']:.0f}",
-        "durable_summary": "; ".join(
-            f"killed at `{r['crashPoint'].split('.')[-1]}`: {r['workflowsCompleted']} of {r['workflows']} workflows completed, "
-            f"{r['issueRows']} issues for {r['openDecisions']} opened names, {r['duplicateIssues']} duplicated"
-            for r in durable["results"]
-        ),
-        "collector_image": collector["collector"],
-        "collector_lines": f"{collector['linesWritten']:,}",
-        "collector_received": f"{collector['recordsReceived']:,}",
-        "collector_missing": str(collector["missing"]),
-        "collector_dup": str(collector["duplicated"]),
-        "collector_trimmed": str(collector["linesTrimmedByCollector"]),
-        "v1_repro": f"{v1repro['rankings_changed']} of {v1repro['rows']}",
-        "v2_dev_avg5": f3(dev["methods"]["sift_v2"]["avg5"]) if "sift_v2" in dev["methods"] else "–",
-        "v2_dev_ac1": f3(dev["methods"]["sift_v2"]["ac1"]) if "sift_v2" in dev["methods"] else "–",
-        "v2_tuning_min": f3(min(t["avg5"] for t in tuning_v2["trials"])),
-        "v2_tuning_max": f3(max(t["avg5"] for t in tuning_v2["trials"])),
-        "predictions_table": preds,
-        "predictions_held": preds.rsplit("\n", 1)[-1].split(" of ")[0] if head != "dev" else "None",
-        "sift_top1_service": str(top1["most_ranked_first"]),
-        "sift_top1_share": f"{top1['share_ranked_first']:.0%}",
-        "dev_sift_avg5": f3(dev["methods"]["sift"]["avg5"]),
-        "dev_logs_avg5": f3(dev["methods"]["mmbaro:logs"]["avg5"]),
-        "dev_logs_lift": f"{dev['methods']['mmbaro:logs']['lift5']:+.3f}",
-        "evidence_table": evidence_table(hs),
-        "dev_evidence_table": evidence_table(dev),
-        "head_label": head_label,
-        "sift_avg5": f3(s["avg5"]),
-        "sift_ac1": f3(s["ac1"]),
-        "logs_baro_avg5": f3(ml["avg5"]),
-        "logs_baro_lift": f"{ml['lift5']:+.3f}",
-        "metrics_baro_avg5": f3(mm["avg5"]),
-        "metrics_baro_ac1": f3(mm["ac1"]),
-        "chance_avg5": f3(s["chance_avg5"]),
-        "paired_diff": f"{pdiff['mean']:+.3f}",
-        "paired_ci": ci((pdiff["lo"], pdiff["hi"])),
-        "head_cases": str(s["cases"]),
-        "head_table": method_table(hs, ORDER),
-        "dev_table": method_table(dev, ORDER),
-        "fault_table": fault_table(groups),
-        "concentration_table": concentration_table(hs),
-        "dev_concentration_table": concentration_table(dev),
-        "crash_runs": str(crash["runs"]),
-        "crash_records": f"{crash['recordsAcked']:,}",
-        "crash_lost": str(crash["lost"]),
-        "crash_dup": str(crash["duplicated"]),
-        "crash_random": str(crash["byCrash"]["random"]),
-        "crash_points": ", ".join(f"`{k}` ({v})" for k, v in crash["byCrash"].items() if k != "random"),
-        "sens_runs": str(sens["runs"]),
-        "sens_lost": f"{sens['lost']:,}",
-        "sens_acked": f"{sens['recordsAcked']:,}",
-        "tp_direct": f"{tp['direct']['recordsPerSec']:,}" if tp else "not measured yet",
-        "tp_http": f"{tp['http']['recordsPerSec']:,}" if tp else "not measured yet",
-        "tp_p50": str(tp["http"]["ackLatencyMs"]["p50"]) if tp else "-",
-        "tp_p99": str(tp["http"]["ackLatencyMs"]["p99"]) if tp else "-",
-        "tp_fresh_p99": str(tp["ingestToQueryableMs"]["p99"]) if tp else "-",
-        "tp_records": f"{tp['input']['records']:,}" if tp else "-",
-        "machine": f"{crash['machine']['cpuModel']}, {crash['machine']['memGB']} GB RAM, Node {crash['machine']['node']}",
-        "pc_coverage": audit["splits"]["dev"]["RE2-OB"]["root_cause_cases_with_any_log"][
-            "productcatalogservice"
-        ],
-        "tuning_trials": str(len(tuning["trials"])),
-        "tuning_min": f3(min(t["avg5"] for t in tuning["trials"])),
-        "tuning_max": f3(max(t["avg5"] for t in tuning["trials"])),
-        "tuning_chosen": tuning["chosen"],
-    }
+    values = (
+        {
+            "q3_table": q3_table(q3),
+            "q3_false_raw": str(raw["false_issues_per_hour"]),
+            "q3_false_gate": str(gate_["false_issues_per_hour"]),
+            "q3_false_cut": f"{raw['false_issues_per_hour'] / gate_['false_issues_per_hour']:.0f}"
+            if gate_["false_issues_per_hour"]
+            else "–",
+            "q3_recall_any": f3(gate_["recall_any"]),
+            "q3_recall_correct_gate": f3(gate_["recall_correct"]),
+            "q3_recall_correct_model": f3(mdl["recall_correct"]),
+            "q3_model": str(model["name"]),
+            "q3_calls": str(model["calls"]),
+            "q3_open_share": f"{model['open_share']:.1%}",
+            "q3_renamed": f"{model['renamed_service_share']:.1%}",
+            "q3_usable": f"{model['usable_answers']} of {model['calls']}",
+            "q3_latency": f"{model['median_latency_ms'] / 1000:.1f} s",
+            "q3_tokens_in": f"{model['median_input_tokens']:.0f}",
+            "q3_tokens_out": f"{model['median_output_tokens']:.0f}",
+            "durable_summary": "; ".join(
+                f"killed at `{r['crashPoint'].split('.')[-1]}`: {r['workflowsCompleted']} of {r['workflows']} workflows completed, "
+                f"{r['issueRows']} issues for {r['openDecisions']} opened names, {r['duplicateIssues']} duplicated"
+                for r in durable["results"]
+            ),
+            "collector_image": collector["collector"],
+            "collector_lines": f"{collector['linesWritten']:,}",
+            "collector_received": f"{collector['recordsReceived']:,}",
+            "collector_missing": str(collector["missing"]),
+            "collector_dup": str(collector["duplicated"]),
+            "collector_trimmed": str(collector["linesTrimmedByCollector"]),
+            "v1_repro": f"{v1repro['rankings_changed']} of {v1repro['rows']}",
+            "v2_dev_avg5": f3(dev["methods"]["sift_v2"]["avg5"]) if "sift_v2" in dev["methods"] else "–",
+            "v2_dev_ac1": f3(dev["methods"]["sift_v2"]["ac1"]) if "sift_v2" in dev["methods"] else "–",
+            "v2_tuning_min": f3(min(t["avg5"] for t in tuning_v2["trials"])),
+            "v2_tuning_max": f3(max(t["avg5"] for t in tuning_v2["trials"])),
+            "predictions_table": preds,
+            "predictions_held": preds.rsplit("\n", 1)[-1].split(" of ")[0] if head != "dev" else "None",
+            "sift_top1_service": str(top1["most_ranked_first"]),
+            "sift_top1_share": f"{top1['share_ranked_first']:.0%}",
+            "dev_sift_avg5": f3(dev["methods"]["sift"]["avg5"]),
+            "dev_logs_avg5": f3(dev["methods"]["mmbaro:logs"]["avg5"]),
+            "dev_logs_lift": f"{dev['methods']['mmbaro:logs']['lift5']:+.3f}",
+            "evidence_table": evidence_table(hs),
+            "dev_evidence_table": evidence_table(dev),
+            "head_label": head_label,
+            "sift_avg5": f3(s["avg5"]),
+            "sift_ac1": f3(s["ac1"]),
+            "logs_baro_avg5": f3(ml["avg5"]),
+            "logs_baro_lift": f"{ml['lift5']:+.3f}",
+            "metrics_baro_avg5": f3(mm["avg5"]),
+            "metrics_baro_ac1": f3(mm["ac1"]),
+            "chance_avg5": f3(s["chance_avg5"]),
+            "paired_diff": f"{pdiff['mean']:+.3f}",
+            "paired_ci": ci((pdiff["lo"], pdiff["hi"])),
+            "head_cases": str(s["cases"]),
+            "head_table": method_table(hs, ORDER),
+            "dev_table": method_table(dev, ORDER),
+            "fault_table": fault_table(groups),
+            "concentration_table": concentration_table(hs),
+            "dev_concentration_table": concentration_table(dev),
+            "crash_runs": str(crash["runs"]),
+            "crash_records": f"{crash['recordsAcked']:,}",
+            "crash_lost": str(crash["lost"]),
+            "crash_dup": str(crash["duplicated"]),
+            "crash_random": str(crash["byCrash"]["random"]),
+            "crash_points": ", ".join(f"`{k}` ({v})" for k, v in crash["byCrash"].items() if k != "random"),
+            "sens_runs": str(sens["runs"]),
+            "sens_lost": f"{sens['lost']:,}",
+            "sens_acked": f"{sens['recordsAcked']:,}",
+            "tp_direct": f"{tp['direct']['recordsPerSec']:,}" if tp else "not measured yet",
+            "tp_http": f"{tp['http']['recordsPerSec']:,}" if tp else "not measured yet",
+            "tp_p50": str(tp["http"]["ackLatencyMs"]["p50"]) if tp else "-",
+            "tp_p99": str(tp["http"]["ackLatencyMs"]["p99"]) if tp else "-",
+            "tp_fresh_p99": str(tp["ingestToQueryableMs"]["p99"]) if tp else "-",
+            "tp_records": f"{tp['input']['records']:,}" if tp else "-",
+            "machine": f"{crash['machine']['cpuModel']}, {crash['machine']['memGB']} GB RAM, Node {crash['machine']['node']}",
+            "pc_coverage": audit["splits"]["dev"]["RE2-OB"]["root_cause_cases_with_any_log"][
+                "productcatalogservice"
+            ],
+            "tuning_trials": str(len(tuning["trials"])),
+            "tuning_min": f3(min(t["avg5"] for t in tuning["trials"])),
+            "tuning_max": f3(max(t["avg5"] for t in tuning["trials"])),
+            "tuning_chosen": tuning["chosen"],
+        }
+        | tb_values
+        | q2_values()
+    )
     (ROOT / "README.md").write_text(render(TEMPLATE.read_text(), values))
     from .site import build
 

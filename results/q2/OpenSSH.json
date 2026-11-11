@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 8589021,
+    "clickhouse-zstd3": 5018490,
+    "gzip-6": 4460712,
+    "zstd-19": 2919507,
+    "zstd-3": 5005291
+  },
+  "grouping": {
+    "ga_content": 0.7796,
+    "ga_full_line": 0.0003,
+    "lines": 638947,
+    "templates_content": 40,
+    "templates_full_line": 71,
+    "true_templates": 38
+  },
+  "seconds": 61.4,
+  "sift": {
+    "ingestSeconds": 10.7,
+    "lines": 638947,
+    "linesReadBack": 638947,
+    "lossless": true,
+    "name": "OpenSSH",
+    "rawBytes": 70536064,
+    "sizes": {
+      "manifest": 214,
+      "rollups": 2180,
+      "segments": 7194571,
+      "templates": 22945,
+      "wal": 108874547
+    },
+    "storeBytes": 7219910,
+    "templates": 71,
+    "verbatimLines": 0
+  },
+  "system": "OpenSSH"
+}

@@ -5,7 +5,8 @@ engine (OTLP intake, write-ahead log, online template mining, Parquet storage, r
 ranking) and a pre-registered measurement of that question on injected faults in real
 microservice systems.
 
-**The first test says: not yet, and it says why.** Sift was designed and tuned on Online
+**Two pre-registered tests say: logs get part of the way, and metrics still win by a wide
+margin.** Sift was designed and tuned on Online
 Boutique, where it reached Avg@5 {{dev_sift_avg5}} from logs alone, against {{dev_logs_avg5}} for
 the published multi-source method given the same logs. Its configuration and seven predictions
 were then committed, and a second system, Sock Shop, was opened once. There, the frozen Sift
@@ -14,9 +15,14 @@ reached Avg@5 **{{sift_avg5}}** (AC@1 {{sift_ac1}}) and ranked `{{sift_top1_serv
 given metrics, {{metrics_baro_avg5}}. Paired difference, Sift minus that method on logs:
 {{paired_diff}} (95% CI {{paired_ci}}). {{predictions_held}} of the seven predictions held.
 
-The reason is specific and fixable, and the fix will be pre-registered before the next system is opened (below): Sift
-counts every template it has never seen as evidence, and Sock Shop's front-end writes new,
-one-off lines all the time, faults or not. Online Boutique's services rarely do.
+The reason was specific: Sift counted every template it had never seen as evidence, and Sock
+Shop's front-end writes new, one-off lines all the time, faults or not. Sift v2 scores a service's
+new templates against its own rate just before the alarm. v2, the unchanged v1 and seven new
+predictions were committed and tagged, and a third system, **Train Ticket, was opened once**.
+There v2 reached Avg@5 **{{tb_v2_avg5}}** against {{tb_v1_avg5}} for v1 (paired difference
+{{tb_v2_v1_diff}}, 95% CI {{tb_v2_v1_ci}}) and {{tb_logs_avg5}} for the published method on the
+same logs; given metrics, BARO reached {{tb_baro_avg5}}. {{tb_predictions_held}} of the seven
+Test B predictions held.
 
 ### At a glance
 
@@ -26,8 +32,9 @@ one-off lines all the time, faults or not. Online Boutique's services rarely do.
 | **Durability** | {{crash_runs}} SIGKILL crash runs, {{crash_records}} acknowledged records: **{{crash_lost}} lost, {{crash_dup}} duplicated**. The same harness catches a deliberately broken recovery. |
 | **Throughput** | {{tp_http}} records/s over OTLP/HTTP, ack p50 {{tp_p50}} ms / p99 {{tp_p99}} ms, on a laptop ({{machine}}). |
 | **Question** | Can logs alone rank the root-cause service? Pre-registered, three-system design, test sets opened once. |
-| **Answer so far** | Not reliably: the Dev design did not transfer to the first test system ({{predictions_held}} of 7 predictions held). Cause diagnosed; the fix will be pre-registered before the next system is opened. |
+| **Answer so far** | Partly. Test A (Sock Shop): the Dev design did not transfer ({{predictions_held}} of 7 predictions held). Test B (Train Ticket): the pre-registered fix beat v1 and the published logs-only method, and stayed far below metrics ({{tb_v2_avg5}} vs {{tb_baro_avg5}} Avg@5; {{tb_predictions_held}} of 7 predictions held). |
 | **Agent** | Sensors fire on logs as they arrive; a deterministic gate re-measures; a local model ({{q3_model}}, via the Vercel AI SDK) decides open or hold; each investigation runs as a Temporal workflow and opens at most one issue in Postgres. On Dev the gate cut false issues from {{q3_false_raw}} to {{q3_false_gate}} per hour; the model added little ({{q3_open_share}} "open"). |
+| **Storage** | Lossless on {{q2_lossless}} Loghub-2.0 systems, but {{q2_summary}}: not a strength yet; likely causes and fixes listed below. |
 | **Interop** | A stock OpenTelemetry Collector ({{collector_image}}, default exporter: protobuf, gzip, retries) delivered {{collector_received}} of {{collector_lines}} lines, {{collector_dup}} duplicated. |
 | **Try it** | `pnpm install && pnpm demo`: a real incident, end to end, in about ten seconds. |
 
@@ -79,6 +86,34 @@ service is the answer:
 
 {{concentration_table}}
 
+## Test B: Train Ticket, opened once
+
+Committed and tagged (`q3-frozen`) before any Train Ticket case was read: Sift v1 unchanged, Sift
+v2, the same baselines and scoring, the agent's configuration, and seven predictions
+([PREREGISTRATION.md](PREREGISTRATION.md), addendum). {{tb_cases}} cases.
+
+{{tb_table}}
+
+A random ranking over the same candidates scores {{tb_chance_avg5}}. {{tb_no_logs}} case ships with
+no log file in RCAEval; every logs-only method scores it as a miss. RCAEval's own code fails on one
+other case for two baseline variants; also a miss.
+
+{{tb_predictions_table}}
+
+- **The fix worked, modestly.** v2 beat v1 by {{tb_v2_v1_diff}} Avg@5 (95% CI {{tb_v2_v1_ci}}); the
+  interval clears zero, but not by much. v1 alone ties the published method on the same logs on
+  Avg@5 ({{tb_v1_logs_diff}}, 95% CI {{tb_v1_logs_ci}}), and v1's AC@1 is {{tb_v1_ac1}} against v2's {{tb_v2_ac1}}.
+- **Metrics still win by a wide margin on this system**: {{tb_baro_avg5}} Avg@5 for metric BARO
+  against {{tb_v2_avg5}} for the best logs-only method.
+
+#### Where logs work and where they do not (Test B)
+
+{{tb_fault_table}}
+
+#### Default-pick check (Test B)
+
+{{tb_concentration_table}}
+
 ## Investigate before alert (the agent)
 
 Root-cause ranking assumes someone already knows when something broke. In production nobody tells
@@ -115,8 +150,43 @@ logs ──▶ sensors (rate, error surge, new error template; per service, Pois
 - **Logs see about half the faults within five minutes, and rarely name the right service
   first**: the same CPU, memory and disk blind spot as the ranking results.
 
-Pre-registered for Test B: the same configuration, untouched, and predictions for each rung
-([PREREGISTRATION.md](PREREGISTRATION.md), addendum).
+#### Test B (Train Ticket, opened once, same configuration)
+
+{{tb_q3_table}}
+
+{{tb_q3_text}}
+
+Detection with the gate can exceed detection by the raw sensors because, by the pre-registered rule,
+repeat issues for the same service and sensor count once: a false issue opened before the fault hides
+a real one after it, and the gate removes many of those early false issues. Train Ticket is far
+noisier than the design system (raw sensors open {{tb_q3_false_raw}} false issues per hour), and the
+gate's cut fell short of the predicted five-fold.
+
+## What logs cost to keep (Loghub-2.0)
+
+Loghub-2.0 (Jiang et al., ISSTA 2024; {{q2_systems}} systems, {{q2_lines}} lines, {{q2_raw_gb}} GB raw,
+ground-truth templates). Each system's raw file goes through Sift's store and through general-purpose
+compressors and ClickHouse; every stored line is then rebuilt and the SHA-256 of the rebuilt stream
+compared with the input. Sizes in MB.
+
+{{q2_table}}
+
+- **Lossless: {{q2_lossless}} systems** rebuilt byte for byte.
+- **Sift's store is not cheap yet.** Over all systems it is {{q2_ratio_store}}× smaller than raw, against
+  {{q2_ratio_gzip}}× for gzip, {{q2_ratio_ch}}× for ClickHouse with ZSTD(3) and {{q2_ratio_zstd19}}× for
+  zstd -19. Likely reasons, not yet isolated: every line carries its own header (date, time, host),
+  which becomes per-line parameters, and parameters are stored as JSON text.
+- **Grouping accuracy** (Loghub's definition) of the online miner: {{q2_ga_content}} on the benchmark's
+  message contents, {{q2_ga_full}} on the full lines Sift stores, averaged over systems. The miner was
+  built for OTLP bodies, where the timestamp and severity arrive as separate fields.
+- **The Sift WAL is not trimmed after a commit**, so on disk the store currently keeps a second,
+  larger-than-raw copy until it is deleted. Trimming it is a small change; it is reported, not hidden.
+- {{q2_not_run}}
+
+What would change the result, in order: parse the header into fields at intake (the Collector's
+regex parser does this), store parameters as typed columns instead of JSON text, trim the WAL after
+each commit, and index the miner's clusters so matching does not slow down as a service's template
+count grows.
 
 ## Try it
 
@@ -206,8 +276,10 @@ machines it takes. The shape it would grow into:
 - No authentication; local use only.
 - The language model is a 3B model on a laptop; it rubber-stamps the gate. A stronger model, or a
   task it is better suited to (naming the upstream service from callers' errors), is open work.
-- Results cover three RCAEval systems with injected faults; Test B is still sealed.
+- Results cover three RCAEval systems with injected faults, each opened for testing once.
 - Throughput is one run on one laptop; the p99 ack latency has not been profiled yet.
+- The store is larger than gzip on raw log files (Loghub-2.0 table above); storage cost is not a
+  strength yet.
 
 ## Durability
 
@@ -240,10 +312,11 @@ Measured with {{tp_records}} real log lines on one laptop; not extrapolated.
 ## Method
 
 - **Data:** RCAEval (Pham et al., WWW 2025), pinned at commit `90b63a4`. Dev: Online Boutique
-  (RE2-OB, RE3-OB). Test A: Sock Shop (RE2-SS, RE3-SS), opened once. Test B: Train Ticket,
-  sealed until the next phase. Sift reads each case through an anonymised path, because RCAEval
+  (RE2-OB, RE3-OB). Test A: Sock Shop (RE2-SS, RE3-SS), opened once. Test B: Train Ticket (RE2-TT,
+  RE3-TT), opened once after the `q3-frozen` tag. Sift reads each case through an anonymised path, because RCAEval
   directory names contain the answer; a test enforces it.
-- **Pre-registration:** [PREREGISTRATION.md](PREREGISTRATION.md), committed before Test A was read.
+- **Pre-registration:** [PREREGISTRATION.md](PREREGISTRATION.md), committed before Test A was read;
+  its addendum committed and tagged `q3-frozen` before Test B was read.
 - **Candidates:** RCAEval's own candidate rule, the same for every method.
 - **Coverage limit:** some root-cause services barely log. In Dev, `productcatalogservice` writes
   any log line in only {{pc_coverage}} of its root-cause cases, so a logs-only method can only find
@@ -253,6 +326,12 @@ Measured with {{tp_records}} real log lines on one laptop; not extrapolated.
   recorded an empty ranking as a failure, which scored Sock Shop's traces-only row as 0 instead of
   a random ranking; fixed and re-run. The diagnosis of Sift's `front-end` failure above is
   post-hoc analysis of Test A.
+- **Test B run notes:** v2 was chosen on Dev (Avg@5 {{v2_dev_avg5}}, AC@1 {{v2_dev_ac1}}, a
+  logged grid of 18 settings spanning {{v2_tuning_min}} to {{v2_tuning_max}}). v1 is unchanged:
+  re-running it on Dev after the v2 change gives {{v1_repro}} changed rankings. The baselines were
+  run twice on Test B with the same code and settings: the first run shared a cache folder with a
+  second, stale process and wrote a corrupt file, so it was discarded before scoring. The agent
+  run was interrupted once by a machine restart before it wrote any output, and was started again.
 
 ### Dev results (design set)
 
@@ -264,12 +343,11 @@ Measured with {{tp_records}} real log lines on one laptop; not extrapolated.
 
 ## What's next
 
-- **Test B (Train Ticket), pre-registered, not yet opened:** Sift v1, Sift v2 (new templates
-  scored against the service's own rate before the alarm; Dev Avg@5 {{v2_dev_avg5}}, AC@1
-  {{v2_dev_ac1}}, from a logged grid of 18 settings spanning {{v2_tuning_min}} to {{v2_tuning_max}})
-  and the investigate-before-alert rungs, all scored once. v1 is unchanged: re-running it on Dev
-  after the v2 change gives {{v1_repro}} changed rankings.
-- **Cost:** lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.
+- **Naming the right service, not just noticing:** the agent detects about half the faults but
+  rarely names the root cause; reading callers' errors to name the upstream service is the next
+  measurable step.
+- **Cost, second round:** the four changes listed under "What logs cost to keep", then the same table
+  again, plus query latency against ClickHouse and CLP.
 
 ## Reproduce
 

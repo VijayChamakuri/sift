@@ -1,0 +1,61 @@
+{
+ "source": "Zenodo record 8275861 (Loghub-2.0, CC-BY-4.0)",
+ "files": {
+  "Apache.zip": {
+   "md5": "0c52d166e5ee118b2d19d8a57cd2d0b4",
+   "url": "https://zenodo.org/api/records/8275861/files/Apache.zip/content"
+  },
+  "OpenSSH.zip": {
+   "md5": "fef920579c366462ea7d341af8f533d8",
+   "url": "https://zenodo.org/api/records/8275861/files/OpenSSH.zip/content"
+  },
+  "Proxifier.zip": {
+   "md5": "2e4b67dc68c3a4f1c18e267c341c52a2",
+   "url": "https://zenodo.org/api/records/8275861/files/Proxifier.zip/content"
+  },
+  "HDFS.zip": {
+   "md5": "f23880dd4938379a535ab71a8d27a798",
+   "url": "https://zenodo.org/api/records/8275861/files/HDFS.zip/content"
+  },
+  "Linux.zip": {
+   "md5": "a1a1db599519eb6b12b3368f37d274f7",
+   "url": "https://zenodo.org/api/records/8275861/files/Linux.zip/content"
+  },
+  "HealthApp.zip": {
+   "md5": "6b90126e1c78591454aef10ecc1da098",
+   "url": "https://zenodo.org/api/records/8275861/files/HealthApp.zip/content"
+  },
+  "HPC.zip": {
+   "md5": "07d035b50ede61f7850e0453e43f85bb",
+   "url": "https://zenodo.org/api/records/8275861/files/HPC.zip/content"
+  },
+  "Zookeeper.zip": {
+   "md5": "e696a94a9b703eb3fd93a2c78e3050ed",
+   "url": "https://zenodo.org/api/records/8275861/files/Zookeeper.zip/content"
+  },
+  "Thunderbird.zip": {
+   "md5": "a8d365d003845c3bef61661375513910",
+   "url": "https://zenodo.org/api/records/8275861/files/Thunderbird.zip/content"
+  },
+  "OpenStack.zip": {
+   "md5": "707faeedf8b1b9f920c073114139a023",
+   "url": "https://zenodo.org/api/records/8275861/files/OpenStack.zip/content"
+  },
+  "BGL.zip": {
+   "md5": "521ee643375bb6e9d0dd88636ff7ece1",
+   "url": "https://zenodo.org/api/records/8275861/files/BGL.zip/content"
+  },
+  "Mac.zip": {
+   "md5": "e5b392e013be0f10a55b5b009f4b9c9d",
+   "url": "https://zenodo.org/api/records/8275861/files/Mac.zip/content"
+  },
+  "Hadoop.zip": {
+   "md5": "e8d413f0ea3f3e90956f185da9d635a8",
+   "url": "https://zenodo.org/api/records/8275861/files/Hadoop.zip/content"
+  },
+  "Spark.zip": {
+   "md5": "ca0ef9c6e8ece0df602793bd302e03a6",
+   "url": "https://zenodo.org/api/records/8275861/files/Spark.zip/content"
+  }
+ }
+}

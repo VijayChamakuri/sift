@@ -123,7 +123,8 @@ OpenTelemetry logs, writes them durably, mines templates as they arrive, stores 
 services most likely to be the root cause, and then tested the bet on public benchmark data with known answers.</p>
 <p>The data is RCAEval, a benchmark of faults injected into real microservice applications, where the faulty
 service is known for every case. I designed and tuned everything on one application (Online Boutique), wrote down
-seven predictions, committed them, and only then opened a second application (Sock Shop), once.</p>
+seven predictions, committed them, and only then opened a second application (Sock Shop), once. Then I
+fixed what failed there, committed new predictions, and opened a third (Train Ticket), once.</p>
 
 <h2>What I found</h2>
 <p>On Online Boutique, Sift reached Avg@5 {{dev_sift_avg5}} from logs alone, against {{dev_logs_avg5}} for the published
@@ -132,10 +133,13 @@ multi-source method given the same logs. On Sock Shop the frozen configuration r
 method on the same logs reached {{logs_baro_avg5}}; given metrics, {{metrics_baro_avg5}}. The paired difference,
 Sift minus that method on logs, is {{paired_diff}} (95% interval {{paired_ci}}). {{predictions_held}} of the seven
 predictions held.</p>
-<p>The cause is specific. Sift counts every template it has never seen before as evidence. Sock Shop's front-end
-writes new, one-off lines all the time, faults or not; Online Boutique's services rarely do. The fix is to score a
-service's new templates against its own rate before the alarm. It will be pre-registered and tested once on a third
-application nobody has looked at yet.</p>
+<p>The cause is specific. Sift counted every template it had never seen before as evidence. Sock Shop's front-end
+writes new, one-off lines all the time, faults or not; Online Boutique's services rarely do. Sift v2 scores a
+service's new templates against its own rate just before the alarm. On Train Ticket, opened once after v2 and seven
+new predictions were tagged, v2 reached <strong>{{tb_v2_avg5}}</strong> against {{tb_v1_avg5}} for the unchanged v1
+(paired difference {{tb_v2_v1_diff}}, 95% interval {{tb_v2_v1_ci}}) and {{tb_logs_avg5}} for the published method on
+the same logs. Given metrics, that system's baseline reached {{tb_baro_avg5}}. Logs get part of the way; metrics still
+win by a wide margin.</p>
 
 <div class="tbl wide"><p class=cap><b>Table 1.</b> {{head_label}}, {{head_cases}} cases. Avg@5 is the mean of AC@1 to AC@5;
 a random ranking over the same candidates scores {{chance_avg5}}. Intervals are 95% paired cluster bootstraps over
@@ -148,6 +152,14 @@ memory and disk pressure, where metrics do far better.</figcaption></figure>
 <h2>The predictions, checked</h2>
 <div class="tbl wide">{{predictions_table}}</div>
 
+<h2>The fix, on a system nobody had looked at</h2>
+<p>Committed and tagged before any Train Ticket case was read: Sift v1 unchanged, Sift v2, the same baselines and
+scoring, the agent's configuration and seven predictions. {{tb_predictions_held}} of the seven held. The gain from v2
+is real but small: its interval clears zero only just, and v1 on its own ties the published method on the same logs on Avg@5 ({{tb_v1_logs_diff}}, 95% interval
+{{tb_v1_logs_ci}}).</p>
+<div class="tbl wide"><p class=cap><b>Table 4.</b> Train Ticket, {{tb_cases}} cases, opened once. A random ranking
+scores {{tb_chance_avg5}}. One case ships with no log file; every logs-only method scores it as a miss.</p>{{tb_table}}</div>
+<div class="tbl wide">{{tb_predictions_table}}</div>
 <h2>What logs carry</h2>
 <p>To separate "what the signal holds" from "how good the method is", the published method is run unchanged with
 only its input varied. On Online Boutique the logs-only variant was at chance ({{dev_logs_lift}} above a random
@@ -175,7 +187,17 @@ window, configuration not tuned. Intervals are 95% cluster bootstraps.</p>{{q3_t
 per hour) at the same detection rate. The small model barely changes anything: it answered "open" to
 {{q3_open_share}} of what the gate passed, with usable answers in {{q3_usable}} calls at a median of {{q3_latency}}.
 That is a finding, not a failure to report: on a laptop, a 3B model is a rubber stamp for a good gate.</p>
+<div class="tbl wide"><p class=cap><b>Table 5.</b> The same configuration on Train Ticket, opened once.</p>{{tb_q3_table}}</div>
+<p>{{tb_q3_text}}</p>
 
+<h2>What logs cost to keep</h2>
+<p>The same store, on Loghub-2.0 ({{q2_systems}} systems, {{q2_lines}} lines with known templates). Every line is
+rebuilt and checked byte for byte ({{q2_lossless}} systems lossless). The honest result: over all systems Sift's
+store is {{q2_ratio_store}}× smaller than raw, while gzip reaches {{q2_ratio_gzip}}× and zstd -19 reaches
+{{q2_ratio_zstd19}}×. The likely reasons, not yet isolated: each line carries its own date, time and host as
+parameters, stored as JSON text. Grouping accuracy on message text averages {{q2_ga_content}}. {{q2_not_run}}</p>
+<div class="tbl wide"><p class=cap><b>Table 6.</b> Sizes in MB. The WAL column is a second copy Sift does not yet
+trim after a commit.</p>{{q2_table}}</div>
 <h2>The engine</h2>
 <p>Logs arrive over OTLP/HTTP and are acknowledged only after an fsync of the write-ahead log. Templates are mined
 online per service and versioned, so every stored line rebuilds byte for byte. Parquet segments, rollups and the
@@ -203,10 +225,10 @@ in about ten seconds, with no Docker, no download and no model.</p>
 
 <h2>What's next</h2>
 <ul>
-<li>Sift v2, frozen on the design set (Avg@5 {{v2_dev_avg5}} there): new templates scored against the service's own
-rate before the alarm.</li>
-<li>The third application (Train Ticket), opened once for v1, v2 and the investigate-before-alert rungs, with
-predictions committed first.</li>
+<li>Storage, second round: parse headers into fields at intake, typed parameter columns, a trimmed WAL and an
+indexed miner, then the same table again.</li>
+<li>Naming the right service, not just noticing: the agent rarely names the root cause. Reading callers' errors to
+name the upstream service is the next measurable step.</li>
 <li>Cost: lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.</li>
 </ul>
 

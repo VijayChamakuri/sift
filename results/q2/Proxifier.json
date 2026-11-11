@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 337566,
+    "clickhouse-zstd3": 203724,
+    "gzip-6": 170880,
+    "zstd-19": 120723,
+    "zstd-3": 184144
+  },
+  "grouping": {
+    "ga_content": 0.015,
+    "ga_full_line": 0.0007,
+    "lines": 21320,
+    "templates_content": 14,
+    "templates_full_line": 27,
+    "true_templates": 11
+  },
+  "seconds": 3.2,
+  "sift": {
+    "ingestSeconds": 0.3,
+    "lines": 21320,
+    "linesReadBack": 21320,
+    "lossless": true,
+    "name": "Proxifier",
+    "rawBytes": 2519391,
+    "sizes": {
+      "manifest": 196,
+      "rollups": 1160,
+      "segments": 300199,
+      "templates": 8865,
+      "wal": 3841333
+    },
+    "storeBytes": 310420,
+    "templates": 27,
+    "verbatimLines": 0
+  },
+  "system": "Proxifier"
+}

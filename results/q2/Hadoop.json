@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 4002617,
+    "clickhouse-zstd3": 2187742,
+    "gzip-6": 2314018,
+    "zstd-19": 1084709,
+    "zstd-3": 1817991
+  },
+  "grouping": {
+    "ga_content": 0.9326,
+    "ga_full_line": 0.7275,
+    "lines": 179993,
+    "templates_content": 620,
+    "templates_full_line": 253,
+    "true_templates": 236
+  },
+  "seconds": 24.6,
+  "sift": {
+    "ingestSeconds": 5.3,
+    "lines": 179993,
+    "linesReadBack": 179993,
+    "lossless": true,
+    "name": "Hadoop",
+    "rawBytes": 31887283,
+    "sizes": {
+      "manifest": 197,
+      "rollups": 3141,
+      "segments": 2473293,
+      "templates": 92418,
+      "wal": 42508022
+    },
+    "storeBytes": 2569049,
+    "templates": 253,
+    "verbatimLines": 0
+  },
+  "system": "Hadoop"
+}

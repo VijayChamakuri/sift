@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 214632666,
+    "clickhouse-zstd3": 105339495,
+    "gzip-6": 94302566,
+    "zstd-19": 58873780,
+    "zstd-3": 99202816
+  },
+  "grouping": {
+    "ga_content": 0.8889,
+    "ga_full_line": 0.8879,
+    "lines": 16075117,
+    "templates_content": 392,
+    "templates_full_line": 260,
+    "true_templates": 236
+  },
+  "seconds": 497.2,
+  "sift": {
+    "ingestSeconds": 230.7,
+    "lines": 16075117,
+    "linesReadBack": 16075117,
+    "lossless": true,
+    "name": "Spark",
+    "rawBytes": 1629352119,
+    "sizes": {
+      "manifest": 556,
+      "rollups": 34523,
+      "segments": 154664371,
+      "templates": 74099,
+      "wal": 2561797255
+    },
+    "storeBytes": 154773549,
+    "templates": 260,
+    "verbatimLines": 0
+  },
+  "system": "Spark"
+}

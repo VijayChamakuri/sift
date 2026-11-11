@@ -1,0 +1,8 @@
+{
+  "ingest_seconds": 118,
+  "lines_per_second": 1695,
+  "lossless": true,
+  "probe_lines": 200000,
+  "system": "Thunderbird",
+  "templates": 4698
+}

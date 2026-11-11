@@ -1,0 +1,37 @@
+{
+  "compressed": {
+    "clickhouse-lz4": 9360737,
+    "clickhouse-zstd3": 5164819,
+    "gzip-6": 5345404,
+    "zstd-19": 3793111,
+    "zstd-3": 5019794
+  },
+  "grouping": {
+    "ga_content": 0.8906,
+    "ga_full_line": 0.3181,
+    "lines": 207632,
+    "templates_content": 42,
+    "templates_full_line": 42,
+    "true_templates": 48
+  },
+  "seconds": 29.4,
+  "sift": {
+    "ingestSeconds": 2.3,
+    "lines": 207632,
+    "linesReadBack": 207632,
+    "lossless": true,
+    "name": "OpenStack",
+    "rawBytes": 61407564,
+    "sizes": {
+      "manifest": 197,
+      "rollups": 1569,
+      "segments": 5755592,
+      "templates": 11955,
+      "wal": 74478779
+    },
+    "storeBytes": 5769313,
+    "templates": 42,
+    "verbatimLines": 0
+  },
+  "system": "OpenStack"
+}

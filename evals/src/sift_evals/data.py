@@ -17,7 +17,12 @@ ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "data"
 RCAEVAL = DATA / "rcaeval"
 CASES_DIR = RCAEVAL / "hf"
-CASE_INDEX = RCAEVAL / "cases.parquet"
+# the downloaded index, or the committed copy (29 KB, MIT) so scoring runs on a clean checkout
+CASE_INDEX = (
+    RCAEVAL / "cases.parquet"
+    if (RCAEVAL / "cases.parquet").exists()
+    else ROOT / "manifests" / "rcaeval-cases.parquet"
+)
 RESULTS = ROOT / "results"
 
 HF_REPO = "phamquiluan/RCAEval"

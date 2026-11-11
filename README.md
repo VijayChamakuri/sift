@@ -28,7 +28,7 @@ one-off lines all the time, faults or not. Online Boutique's services rarely do.
 ### Test A (Sock Shop, opened once)
 
 | Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |
-|---|---|---:|---:|---:|---|---:|---:|
+|---|---|---:|---:|---:|---:|---:|---:|
 | **Sift (logs)** | logs | 0.075 | 0.608 | 0.443 | [0.34, 0.55] | +0.171 | 0 |
 | Error-surge control (logs) | logs | 0.166 | 0.511 | 0.456 | [0.37, 0.55] | +0.183 | 0 |
 | Multi-source BARO, logs only | logs | 0.308 | 0.592 | 0.555 | [0.44, 0.67] | +0.282 | 0 |
@@ -186,7 +186,7 @@ Measured with 685,716 real log lines on one laptop; not extrapolated.
 ### Dev results (design set)
 
 | Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |
-|---|---|---:|---:|---:|---|---:|---:|
+|---|---|---:|---:|---:|---:|---:|---:|
 | **Sift (logs)** | logs | 0.375 | 0.542 | 0.533 | [0.41, 0.66] | +0.283 | 0 |
 | Error-surge control (logs) | logs | 0.074 | 0.418 | 0.373 | [0.29, 0.46] | +0.123 | 0 |
 | Multi-source BARO, logs only | logs | 0.150 | 0.250 | 0.252 | [0.15, 0.37] | +0.002 | 0 |

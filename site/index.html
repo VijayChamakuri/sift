@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sift</title>
+<meta name="description" content="Can an agent find the broken service from logs alone? A logs-only observability engine and a pre-registered test on injected microservice faults.">
+<style>
+:root{--paper:#ffffff;--ink:#1c1b19;--ink2:#47443e;--muted:#77736a;--rule:#d9d3c6;--rule2:#ebe6db;--link:#1a4c8c;--flag:#a3261b;--code:#f2eee3}
+html{color-scheme:light}*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.62 Charter,"Bitstream Charter","Iowan Old Style","Sitka Text",Cambria,Georgia,serif;-webkit-text-size-adjust:100%}
+.page{max-width:700px;margin:0 auto;padding:20px 20px 96px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 24px;padding-bottom:12px;margin-bottom:56px;border-bottom:1px solid var(--rule);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--muted)}
+.top a{color:var(--ink2);text-decoration:none}.top a:hover{color:var(--link);text-decoration:underline}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 18px}.top nav span{color:var(--ink);font-weight:600}
+h1{font-size:clamp(28px,5.4vw,38px);line-height:1.18;letter-spacing:-.01em;margin:0 0 14px}
+.meta{font-style:italic;color:var(--muted);font-size:16px;margin:0 0 40px}
+h2{font-size:24px;line-height:1.3;margin:60px 0 12px}
+p{margin:0 0 18px}ol,ul{margin:0 0 18px;padding-left:26px}li{margin:0 0 12px}li::marker{color:var(--muted)}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+code{font:.8em ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--code);padding:2px 4px;border-radius:3px}
+pre{font:14px/1.5 ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--code);padding:12px 14px;border-radius:4px;overflow-x:auto}
+pre code{background:none;padding:0;font-size:inherit}
+.wide{position:relative;left:50%;transform:translateX(-50%);width:min(1000px,calc(100vw - 40px))}
+figure{margin:36px 0}figure.narrow img{max-width:560px}figure img{display:block;width:100%;height:auto;margin:0 auto}
+figcaption,.cap{font-size:15.5px;line-height:1.5;color:var(--ink2);max-width:700px;margin:12px auto 0}
+.cap{margin:0 auto 10px}figcaption b,.cap b{color:var(--ink)}
+.tbl{margin:32px 0}.scroll{overflow-x:auto}
+.tbl.wide{width:fit-content;min-width:min(700px,calc(100vw - 40px));max-width:min(1000px,calc(100vw - 40px))}.cap{contain:inline-size}
+.tbl p{font-size:15.5px;color:var(--ink2);margin:10px 0 0}
+table{border-collapse:collapse;width:100%;font:13.5px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+th{font-weight:600;text-align:left;vertical-align:bottom;padding:8px 10px;border-bottom:1px solid var(--ink)}
+td{padding:6px 10px;border-bottom:1px solid var(--rule2);vertical-align:top}tr:last-child td{border-bottom:0}
+.n{text-align:right;white-space:nowrap}th.n{white-space:normal;min-width:5em}td:first-child{min-width:11em}.dim{color:var(--muted)}.flag{color:var(--flag);font-weight:600}
+footer{margin-top:80px;padding-top:14px;border-top:1px solid var(--rule);font-size:15px;color:var(--muted)}
+@media (max-width:600px){body{font-size:17px}.top{margin-bottom:36px}h2{margin-top:48px}}
+</style></head><body><div class=page>
+<header class=top><a href="https://github.com/VijayChamakuri">Vijay Chamakuri</a>
+<nav><a href="https://vijaychamakuri.github.io/trustgate/">TrustGate</a><a href="https://vijaychamakuri.github.io/commitcompass/">CommitCompass</a><a href="https://vijaychamakuri.github.io/judgegate/">JudgeGate</a><span>Sift</span></nav></header>
+<main>
+<h1>Can an agent find the broken service from logs alone?</h1>
+<p class=meta>Vijay Chamakuri, November 2026. Code, data and full method on <a href="https://github.com/VijayChamakuri/sift">GitHub</a>.</p>
+
+<p>Some observability products are betting that logs are enough: metrics and traces can be derived from them,
+and an agent reading them can find what broke. I built a small version of that path, an engine that takes
+OpenTelemetry logs, writes them durably, mines templates as they arrive, stores them in Parquet and ranks the
+services most likely to be the root cause, and then tested the bet on public benchmark data with known answers.</p>
+<p>The data is RCAEval, a benchmark of faults injected into real microservice applications, where the faulty
+service is known for every case. I designed and tuned everything on one application (Online Boutique), wrote down
+seven predictions, committed them, and only then opened a second application (Sock Shop), once.</p>
+
+<h2>What I found</h2>
+<p>On Online Boutique, Sift reached Avg@5 0.533 from logs alone, against 0.252 for the published
+multi-source method given the same logs. On Sock Shop the frozen configuration reached <strong>0.443</strong>
+(AC@1 0.075) and ranked <code>front-end</code> first in 99% of cases. The published
+method on the same logs reached 0.555; given metrics, 0.770. The paired difference,
+Sift minus that method on logs, is -0.112 (95% interval [-0.18, -0.04]). 3 of the seven
+predictions held.</p>
+<p>The cause is specific. Sift counts every template it has never seen before as evidence. Sock Shop's front-end
+writes new, one-off lines all the time, faults or not; Online Boutique's services rarely do. The fix is to score a
+service's new templates against its own rate before the alarm. That is the next pre-registered test, on a third
+application nobody has looked at yet.</p>
+
+<div class="tbl wide"><p class=cap><b>Table 1.</b> Test A (Sock Shop, opened once), 120 cases. Avg@5 is the mean of AC@1 to AC@5;
+a random ranking over the same candidates scores 0.273. Intervals are 95% paired cluster bootstraps over
+(service, fault) scenarios; a failed run counts as a miss.</p><div class=scroll><table><thead><tr><th>Method</th><th>Signal</th><th class=n>AC@1</th><th class=n>AC@3</th><th class=n>Avg@5</th><th class=n>95% CI</th><th class=n>Lift over chance</th><th class=n>Failed</th></tr></thead><tbody><tr><td><strong>Sift (logs)</strong></td><td>logs</td><td class=n>0.075</td><td class=n>0.608</td><td class=n>0.443</td><td class=n>[0.34, 0.55]</td><td class=n>+0.171</td><td class=n>0</td></tr><tr><td>Error-surge control (logs)</td><td>logs</td><td class=n>0.166</td><td class=n>0.511</td><td class=n>0.456</td><td class=n>[0.37, 0.55]</td><td class=n>+0.183</td><td class=n>0</td></tr><tr><td>Multi-source BARO, logs only</td><td>logs</td><td class=n>0.308</td><td class=n>0.592</td><td class=n>0.555</td><td class=n>[0.44, 0.67]</td><td class=n>+0.282</td><td class=n>0</td></tr><tr><td>Multi-source BARO, traces only</td><td>traces</td><td class=n>0.091</td><td class=n>0.273</td><td class=n>0.273</td><td class=n>[0.27, 0.27]</td><td class=n>+0.000</td><td class=n>0</td></tr><tr><td>Multi-source BARO, metrics only</td><td>metrics</td><td class=n>0.108</td><td class=n>0.958</td><td class=n>0.770</td><td class=n>[0.73, 0.80]</td><td class=n>+0.497</td><td class=n>0</td></tr><tr><td>Multi-source BARO, all signals</td><td>all</td><td class=n>0.108</td><td class=n>0.958</td><td class=n>0.772</td><td class=n>[0.74, 0.81]</td><td class=n>+0.499</td><td class=n>0</td></tr><tr><td>BARO (metrics)</td><td>metrics</td><td class=n>0.100</td><td class=n>0.967</td><td class=n>0.768</td><td class=n>[0.73, 0.80]</td><td class=n>+0.496</td><td class=n>0</td></tr></tbody></table></div></div>
+
+<figure class=wide><img src="by_fault.png" alt="Avg@5 by fault type for Sift, the published method on logs only and the published method on metrics only.">
+<figcaption><b>Figure 1.</b> By fault type. Logs see code-level faults and packet loss; they say little about CPU,
+memory and disk pressure, where metrics do far better.</figcaption></figure>
+
+<h2>The predictions, checked</h2>
+<div class="tbl wide"><div class=scroll><table><thead><tr><th>Prediction (committed before the test set was read)</th><th>Outcome</th><th>Evidence</th></tr></thead><tbody><tr><td>Logs-only multi-source BARO stays near chance (chance inside its 95% CI)</td><td><strong>failed</strong></td><td>Avg@5 0.555 [0.44, 0.67], chance 0.273</td></tr><tr><td>Sift beats logs-only multi-source BARO (paired 95% CI above zero)</td><td><strong>failed</strong></td><td>difference -0.112 [-0.18, -0.04]</td></tr><tr><td>Sift stays below metric-based BARO on Avg@5</td><td>held</td><td>0.443 vs 0.768</td></tr><tr><td>Sift's AC@1 is at least metric-based BARO's</td><td><strong>failed</strong></td><td>0.075 vs 0.100</td></tr><tr><td>Sift is stronger on code-level and LOSS than on CPU, MEM, DISK</td><td>held</td><td>0.647 vs 0.324 (mean Avg@5)</td></tr><tr><td>Most of Sift's correct top-1 picks rest on restart or redeploy evidence</td><td><strong>failed</strong></td><td>0 of 9</td></tr><tr><td>Sift's test Avg@5 is below its Dev Avg@5</td><td>held</td><td>0.443 vs 0.533</td></tr></tbody></table></div><p>3 of 7 predictions held.</p></div>
+
+<h2>What logs carry</h2>
+<p>To separate "what the signal holds" from "how good the method is", the published method is run unchanged with
+only its input varied. On Online Boutique the logs-only variant was at chance (+0.002 above a random
+ranking); on Sock Shop it is clearly above it (+0.282). What logs carry depends on how a system logs.</p>
+<figure class=narrow><img src="ablation.png" alt="Avg@5 of the same method given metrics only, traces only, logs only and all signals.">
+<figcaption><b>Figure 2.</b> Same method, different signals. Sock Shop has no traces, so its traces-only run
+ranks nothing and scores as a random ranking.</figcaption></figure>
+
+<h2>A check every method gets</h2>
+<p>A method that names the same service first in most cases looks accurate whenever that service is the answer.
+The metric-based baseline names a datastore first in most cases, and that datastore is never the answer; Sift's
+failure on Sock Shop is the same pattern. The table shows it for every method.</p>
+<div class="tbl wide"><div class=scroll><table><thead><tr><th>Method</th><th>Most often ranked first</th><th class=n>Share of cases ranked first</th><th class=n>Share of cases it is the answer</th></tr></thead><tbody><tr><td>Sift (logs)</td><td><code>front-end</code></td><td class=n>0.99</td><td class=n>0.07</td></tr><tr><td>Error-surge control (logs)</td><td><code>front-end</code></td><td class=n>0.43</td><td class=n>0.07</td></tr><tr><td>Multi-source BARO, logs only</td><td><code>front-end</code></td><td class=n>0.42</td><td class=n>0.07</td></tr><tr><td>Multi-source BARO, traces only</td><td><code>None</code></td><td class=n>0.00</td><td class=n>0.00</td></tr><tr><td>Multi-source BARO, metrics only</td><td><code>session</code></td><td class=n>0.88</td><td class=n>0.00</td></tr><tr><td>Multi-source BARO, all signals</td><td><code>session</code></td><td class=n>0.88</td><td class=n>0.00</td></tr><tr><td>BARO (metrics)</td><td><code>session</code></td><td class=n>0.88</td><td class=n>0.00</td></tr></tbody></table></div></div>
+
+<h2>The engine</h2>
+<p>Logs arrive over OTLP/HTTP and are acknowledged only after an fsync of the write-ahead log. Templates are mined
+online per service and versioned, so every stored line rebuilds byte for byte. Parquet segments, rollups and the
+template registry are committed together by one atomic manifest, and anything after it is replayed from the log on
+restart.</p>
+<div class="tbl wide"><p class=cap><b>Table 2.</b> Crash test: kill the server under load at random moments and at
+each commit step, restart, resend batches whose outcome is unknown, then check every acknowledged record.
+Running the same test with recovery deliberately broken lost 390,200 of 826,800 records, so the test can
+see a failure.</p>
+<div class=scroll><table><tbody>
+<tr><td>Crash runs</td><td class=n>100</td></tr>
+<tr><td>Acknowledged records</td><td class=n>20,493,200</td></tr>
+<tr><td>Lost</td><td class=n><strong>0</strong></td></tr>
+<tr><td>Duplicated</td><td class=n><strong>0</strong></td></tr>
+<tr><td>OTLP/HTTP throughput, 8 senders</td><td class=n>315,648 records/s</td></tr>
+<tr><td>Ack latency per 1,000-record batch</td><td class=n>p50 19.8 ms, p99 253.6 ms</td></tr>
+<tr><td>Machine</td><td class=n>Apple M2, 8 GB RAM, Node 24.19.0</td></tr>
+</tbody></table></div></div>
+<p>The durability claim is for a process crash: power loss on macOS would also need <code>F_FULLFSYNC</code> and is
+not claimed. To try it: <code>pnpm install &amp;&amp; pnpm demo</code> replays one real incident through the whole path
+in about ten seconds, with no Docker, no download and no model.</p>
+
+<h2>What's next</h2>
+<ul>
+<li>Sift v2, pre-registered before the third application is opened: new templates scored against the service's own
+rate before the alarm.</li>
+<li>Investigate before alert: sensors fire, a deterministic gate re-measures, a local model decides whether to open an
+issue, on forward-only replay with no access to the injection time.</li>
+<li>Cost: lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.</li>
+</ul>
+
+<footer><p>Every number on this page is generated from committed per-case outputs; CI regenerates it and fails if
+anything changes. The configuration and predictions were committed before the test set was read:
+<a href="https://github.com/VijayChamakuri/sift/blob/main/PREREGISTRATION.md">PREREGISTRATION.md</a>.</p>
+<p>Code: MIT licence. Data: RCAEval (Pham et al., WWW 2025), MIT licence. OpenTelemetry protocol definitions: Apache-2.0.</p></footer>
+</main></div></body></html>

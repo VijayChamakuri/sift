@@ -53,7 +53,7 @@ def ci(c: list[float] | tuple[float, float]) -> str:
 def method_table(summary: dict, methods: list[str]) -> str:
     rows = [
         "| Method | Signal | AC@1 | AC@3 | Avg@5 | 95% CI | Lift over chance | Failed |",
-        "|---|---|---:|---:|---:|---|---:|---:|",
+        "|---|---|---:|---:|---:|---:|---:|---:|",
     ]
     for m in methods:
         s = summary["methods"][m]
@@ -318,6 +318,9 @@ def main() -> None:
         "tuning_chosen": tuning["chosen"],
     }
     (ROOT / "README.md").write_text(render(TEMPLATE.read_text(), values))
+    from .site import build
+
+    build(values, FIG)
     print("README.md and docs/figures regenerated from", ", ".join(splits))
 
 

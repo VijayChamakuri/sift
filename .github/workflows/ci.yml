@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.17.1 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter sift-engine typecheck
+      - run: pnpm --filter sift-engine test
+      - run: pnpm --filter sift-engine build
+      - name: crash smoke test (10 runs; the 100-run harness runs before each release)
+        run: pnpm --filter sift-engine exec tsx bench/crash.ts --runs 10 --out /tmp/crash-smoke.json
+      - name: demo from a fresh clone finishes in under 2 minutes
+        run: |
+          start=$(date +%s)
+          pnpm demo
+          elapsed=$(( $(date +%s) - start ))
+          echo "demo took ${elapsed}s"
+          test "$elapsed" -le 120
+
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --project evals --frozen
+      - run: uv run --project evals ruff check evals
+      - run: uv run --project evals pytest evals/tests -q
+      - name: every published number regenerates from committed per-case outputs
+        run: |
+          uv run --project evals python -m sift_evals.report
+          git diff --exit-code README.md site/ results/

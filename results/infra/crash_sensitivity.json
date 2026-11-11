@@ -1,0 +1,79 @@
+{
+  "runs": 6,
+  "recordsAcked": 826800,
+  "lost": 390200,
+  "duplicated": 0,
+  "byCrash": {
+    "random": 3,
+    "wal.beforeFsync": 1,
+    "wal.afterFsync": 1,
+    "store.afterSegment": 1,
+    "store.afterManifest": 0,
+    "store.midCompaction": 0
+  },
+  "seconds": 11,
+  "machine": {
+    "cpus": 8,
+    "cpuModel": "Apple M2",
+    "memGB": 8,
+    "node": "24.19.0",
+    "platform": "darwin"
+  },
+  "claim": "process crash (SIGKILL); power loss not tested",
+  "results": [
+    {
+      "run": 0,
+      "crashedBy": "random kill at 1792 ms",
+      "batches": 980,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 196000,
+      "lost": 91000,
+      "duplicated": 0
+    },
+    {
+      "run": 1,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 200,
+      "duplicated": 0
+    },
+    {
+      "run": 2,
+      "crashedBy": "random kill at 1655 ms",
+      "batches": 925,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 185000,
+      "lost": 72400,
+      "duplicated": 0
+    },
+    {
+      "run": 3,
+      "crashedBy": "wal.afterFsync:3",
+      "batches": 9,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1800,
+      "lost": 1000,
+      "duplicated": 0
+    },
+    {
+      "run": 4,
+      "crashedBy": "random kill at 1980 ms",
+      "batches": 1081,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 216200,
+      "lost": 108000,
+      "duplicated": 0
+    },
+    {
+      "run": 5,
+      "crashedBy": "store.afterSegment:2",
+      "batches": 1134,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 226800,
+      "lost": 117600,
+      "duplicated": 0
+    }
+  ]
+}

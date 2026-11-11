@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite it as below."
+title: "Sift: can an agent find the broken service from logs alone?"
+authors:
+  - family-names: Chamakuri
+    given-names: Vijay
+version: 0.1.0
+date-released: 2026-11-11
+license: MIT
+repository-code: "https://github.com/VijayChamakuri/sift"
+url: "https://vijaychamakuri.github.io/sift/"
+keywords: [observability, logs, root cause analysis, AIOps, OpenTelemetry, write-ahead log, log template mining, evaluation, pre-registration]

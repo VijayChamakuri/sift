@@ -1,0 +1,407 @@
+{
+  "base": {
+    "minCount": 1,
+    "wNovelty": 1,
+    "windowSeconds": 300
+  },
+  "chosen": "errorWeight1_wShift1_wSurge0.5",
+  "grid": {
+    "errorWeight": [
+      1,
+      2,
+      4
+    ],
+    "wShift": [
+      0,
+      0.5,
+      1
+    ],
+    "wSurge": [
+      0.5,
+      1
+    ]
+  },
+  "rule": "max Dev Avg@5, ties by AC@1",
+  "trials": [
+    {
+      "ac1": 0.26666666666666666,
+      "ac2": 0.37507575757575756,
+      "ac3": 0.4668181818181818,
+      "ac4": 0.5327504208754209,
+      "ac5": 0.5903493265993266,
+      "avg5": 0.4463320707070707,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 1,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.19595328282828284,
+      "name": "errorWeight1_wShift0_wSurge0.5"
+    },
+    {
+      "ac1": 0.26666666666666666,
+      "ac2": 0.35007575757575754,
+      "ac3": 0.4668181818181818,
+      "ac4": 0.5327504208754209,
+      "ac5": 0.5903493265993266,
+      "avg5": 0.4413320707070707,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 1,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.19095328282828283,
+      "name": "errorWeight1_wShift0_wSurge1"
+    },
+    {
+      "ac1": 0.2916666666666667,
+      "ac2": 0.4,
+      "ac3": 0.525,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.625,
+      "avg5": 0.48166666666666663,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 1,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0.5,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.23128787878787876,
+      "name": "errorWeight1_wShift0.5_wSurge0.5"
+    },
+    {
+      "ac1": 0.2916666666666667,
+      "ac2": 0.375,
+      "ac3": 0.5,
+      "ac4": 0.5583333333333333,
+      "ac5": 0.6083333333333333,
+      "avg5": 0.4666666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 1,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0.5,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.2162878787878788,
+      "name": "errorWeight1_wShift0.5_wSurge1"
+    },
+    {
+      "ac1": 0.30833333333333335,
+      "ac2": 0.425,
+      "ac3": 0.5333333333333333,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.6416666666666667,
+      "avg5": 0.495,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 1,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 1,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.24462121212121213,
+      "name": "errorWeight1_wShift1_wSurge0.5"
+    },
+    {
+      "ac1": 0.30833333333333335,
+      "ac2": 0.4083333333333333,
+      "ac3": 0.525,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.625,
+      "avg5": 0.48666666666666664,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 1,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 1,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.23628787878787877,
+      "name": "errorWeight1_wShift1_wSurge1"
+    },
+    {
+      "ac1": 0.19166666666666668,
+      "ac2": 0.37507575757575756,
+      "ac3": 0.47515151515151516,
+      "ac4": 0.5327504208754209,
+      "ac5": 0.5903493265993266,
+      "avg5": 0.4329987373737374,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 2,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.18261994949494953,
+      "name": "errorWeight2_wShift0_wSurge0.5"
+    },
+    {
+      "ac1": 0.19166666666666668,
+      "ac2": 0.35007575757575754,
+      "ac3": 0.47515151515151516,
+      "ac4": 0.5327504208754209,
+      "ac5": 0.5903493265993266,
+      "avg5": 0.4279987373737374,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 2,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.17761994949494953,
+      "name": "errorWeight2_wShift0_wSurge1"
+    },
+    {
+      "ac1": 0.2,
+      "ac2": 0.4083333333333333,
+      "ac3": 0.5333333333333333,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.625,
+      "avg5": 0.4666666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 2,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0.5,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.2162878787878788,
+      "name": "errorWeight2_wShift0.5_wSurge0.5"
+    },
+    {
+      "ac1": 0.2,
+      "ac2": 0.38333333333333336,
+      "ac3": 0.5083333333333333,
+      "ac4": 0.5583333333333333,
+      "ac5": 0.6083333333333333,
+      "avg5": 0.4516666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 2,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0.5,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.20128787878787885,
+      "name": "errorWeight2_wShift0.5_wSurge1"
+    },
+    {
+      "ac1": 0.20833333333333334,
+      "ac2": 0.425,
+      "ac3": 0.5416666666666666,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.6416666666666667,
+      "avg5": 0.4766666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 2,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 1,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.22628787878787882,
+      "name": "errorWeight2_wShift1_wSurge0.5"
+    },
+    {
+      "ac1": 0.20833333333333334,
+      "ac2": 0.4,
+      "ac3": 0.5333333333333333,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.625,
+      "avg5": 0.4666666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 2,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 1,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.2162878787878788,
+      "name": "errorWeight2_wShift1_wSurge1"
+    },
+    {
+      "ac1": 0.18333333333333332,
+      "ac2": 0.3917424242424242,
+      "ac3": 0.47515151515151516,
+      "ac4": 0.5327504208754209,
+      "ac5": 0.5903493265993266,
+      "avg5": 0.43466540404040405,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 4,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.18428661616161618,
+      "name": "errorWeight4_wShift0_wSurge0.5"
+    },
+    {
+      "ac1": 0.15833333333333333,
+      "ac2": 0.3917424242424242,
+      "ac3": 0.47515151515151516,
+      "ac4": 0.5327504208754209,
+      "ac5": 0.5903493265993266,
+      "avg5": 0.42966540404040404,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 4,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.17928661616161617,
+      "name": "errorWeight4_wShift0_wSurge1"
+    },
+    {
+      "ac1": 0.18333333333333332,
+      "ac2": 0.4166666666666667,
+      "ac3": 0.5333333333333333,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.625,
+      "avg5": 0.465,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 4,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0.5,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.21462121212121216,
+      "name": "errorWeight4_wShift0.5_wSurge0.5"
+    },
+    {
+      "ac1": 0.15833333333333333,
+      "ac2": 0.4166666666666667,
+      "ac3": 0.5083333333333333,
+      "ac4": 0.5583333333333333,
+      "ac5": 0.6083333333333333,
+      "avg5": 0.45,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 4,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 0.5,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.19962121212121214,
+      "name": "errorWeight4_wShift0.5_wSurge1"
+    },
+    {
+      "ac1": 0.18333333333333332,
+      "ac2": 0.425,
+      "ac3": 0.5416666666666666,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.6416666666666667,
+      "avg5": 0.4716666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 4,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 1,
+        "wSurge": 0.5,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.2212878787878788,
+      "name": "errorWeight4_wShift1_wSurge0.5"
+    },
+    {
+      "ac1": 0.15833333333333333,
+      "ac2": 0.425,
+      "ac3": 0.5333333333333333,
+      "ac4": 0.5666666666666667,
+      "ac5": 0.625,
+      "avg5": 0.46166666666666667,
+      "cases": 120,
+      "chance_avg5": 0.25037878787878787,
+      "config": {
+        "errorWeight": 4,
+        "minCount": 1,
+        "wNovelty": 1,
+        "wShift": 1,
+        "wSurge": 1,
+        "windowSeconds": 300
+      },
+      "failed": 0,
+      "lift5": 0.2112878787878788,
+      "name": "errorWeight4_wShift1_wSurge1"
+    }
+  ],
+  "round": 1,
+  "superseded_because": "top-1 concentration check: Sift ranked recommendationservice first in 52/120 Dev cases (42 wrong) and redis in 33 (all wrong). Causes: identifier lists (product_ids=['2ZYFJ3GM2N', ...]) were not masked, so new ID combinations looked like new templates; the volume-shift score inflated tiny services. Fixed in the miner (identifier mask) and ranker (Poisson z against the system trend); grid re-run as round 2."
+}

@@ -1,0 +1,7 @@
+data/
+node_modules/
+.venv/
+.sift/
+engine/dist/
+configs/grid/
+__pycache__/

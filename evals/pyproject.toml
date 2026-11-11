@@ -1,0 +1,46 @@
+[project]
+name = "sift-evals"
+version = "0.1.0"
+description = "Evaluation harness for Sift: logs-only root cause analysis on RCAEval"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "duckdb>=1.1",
+  "pandas>=2.2",
+  "numpy>=2.0",
+  "pyarrow>=17",
+  "scikit-learn>=1.5",
+  "networkx>=3.3",
+  "drain3>=0.9.11",
+  "huggingface_hub>=0.26",
+  "matplotlib>=3.9",
+  "requests>=2.32",
+  "toml>=0.10",
+  "python-dateutil>=2.9",
+  "tqdm>=4.66",
+  "RCAEval @ git+https://github.com/phamquiluan/RCAEval@90b63a46ac1e969f1fa9015318b51e455c62f8c4",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sift_evals"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]  # the formatter wraps code; long messages and SQL stay on one line
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true

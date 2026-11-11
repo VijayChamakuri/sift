@@ -1,0 +1,10 @@
+{
+  "case": "re3ob_adservice_f4_1",
+  "dataset": "RE3-OB",
+  "inject_time": 1731905504,
+  "root_cause_service": "adservice",
+  "fault": "f4",
+  "lines": 32531,
+  "window_seconds": 300,
+  "source": "RCAEval (Pham et al., WWW 2025), MIT licence, https://github.com/phamquiluan/RCAEval @ 90b63a46ac1e969f1fa9015318b51e455c62f8c4"
+}

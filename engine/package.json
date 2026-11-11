@@ -1,0 +1,32 @@
+{
+  "name": "sift-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Logs-only observability engine: OTLP/HTTP intake, write-ahead log, template mining, Parquet storage, root-cause ranking",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "sift": "./dist/surfaces/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "sift": "tsx src/surfaces/cli.ts",
+    "demo": "tsx src/surfaces/demo.ts"
+  },
+  "dependencies": {
+    "@duckdb/node-api": "2.0.0-r.1",
+    "fastify": "^5.12.8",
+    "protobufjs": "^8.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

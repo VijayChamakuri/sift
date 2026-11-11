@@ -1,0 +1,925 @@
+{
+  "runs": 100,
+  "recordsAcked": 20493200,
+  "lost": 0,
+  "duplicated": 0,
+  "byCrash": {
+    "random": 50,
+    "wal.beforeFsync": 10,
+    "wal.afterFsync": 10,
+    "store.afterSegment": 10,
+    "store.afterManifest": 10,
+    "store.midCompaction": 10
+  },
+  "seconds": 328,
+  "machine": {
+    "cpus": 8,
+    "cpuModel": "Apple M2",
+    "memGB": 8,
+    "node": "24.19.0",
+    "platform": "darwin"
+  },
+  "claim": "process crash (SIGKILL); power loss not tested",
+  "results": [
+    {
+      "run": 0,
+      "crashedBy": "random kill at 1792 ms",
+      "batches": 920,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 184000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 1,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 2,
+      "crashedBy": "random kill at 1655 ms",
+      "batches": 850,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 170000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 3,
+      "crashedBy": "wal.afterFsync:3",
+      "batches": 11,
+      "unknownBeforeRetry": 7,
+      "ackedRecords": 2200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 4,
+      "crashedBy": "random kill at 1980 ms",
+      "batches": 1015,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 203000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 5,
+      "crashedBy": "store.afterSegment:2",
+      "batches": 1052,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 210400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 6,
+      "crashedBy": "random kill at 2474 ms",
+      "batches": 1293,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 258600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 7,
+      "crashedBy": "store.afterManifest:3",
+      "batches": 1558,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 311600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 8,
+      "crashedBy": "random kill at 486 ms",
+      "batches": 251,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 50200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 9,
+      "crashedBy": "store.midCompaction:3",
+      "batches": 4207,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 841400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 10,
+      "crashedBy": "random kill at 824 ms",
+      "batches": 441,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 88200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 11,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 12,
+      "crashedBy": "random kill at 2781 ms",
+      "batches": 1440,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 288000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 13,
+      "crashedBy": "wal.afterFsync:1",
+      "batches": 4,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 14,
+      "crashedBy": "random kill at 1260 ms",
+      "batches": 643,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 128600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 15,
+      "crashedBy": "store.afterSegment:1",
+      "batches": 553,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 110600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 16,
+      "crashedBy": "random kill at 479 ms",
+      "batches": 258,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 51600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 17,
+      "crashedBy": "store.afterManifest:3",
+      "batches": 1570,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 314000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 18,
+      "crashedBy": "random kill at 2610 ms",
+      "batches": 1357,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 271400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 19,
+      "crashedBy": "store.midCompaction:3",
+      "batches": 4159,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 831800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 20,
+      "crashedBy": "random kill at 2153 ms",
+      "batches": 1055,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 211000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 21,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 22,
+      "crashedBy": "random kill at 1845 ms",
+      "batches": 971,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 194200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 23,
+      "crashedBy": "wal.afterFsync:2",
+      "batches": 5,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 24,
+      "crashedBy": "random kill at 809 ms",
+      "batches": 444,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 88800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 25,
+      "crashedBy": "store.afterSegment:3",
+      "batches": 1528,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 305600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 26,
+      "crashedBy": "random kill at 472 ms",
+      "batches": 222,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 44400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 27,
+      "crashedBy": "store.afterManifest:3",
+      "batches": 1575,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 315000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 28,
+      "crashedBy": "random kill at 665 ms",
+      "batches": 368,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 73600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 29,
+      "crashedBy": "store.midCompaction:1",
+      "batches": 4077,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 815400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 30,
+      "crashedBy": "random kill at 2091 ms",
+      "batches": 1051,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 210200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 31,
+      "crashedBy": "wal.beforeFsync:3",
+      "batches": 9,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 32,
+      "crashedBy": "random kill at 2458 ms",
+      "batches": 1231,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 246200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 33,
+      "crashedBy": "wal.afterFsync:3",
+      "batches": 8,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 1600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 34,
+      "crashedBy": "random kill at 2389 ms",
+      "batches": 1204,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 240800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 35,
+      "crashedBy": "store.afterSegment:3",
+      "batches": 1567,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 313400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 36,
+      "crashedBy": "random kill at 390 ms",
+      "batches": 218,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 43600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 37,
+      "crashedBy": "store.afterManifest:2",
+      "batches": 1060,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 212000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 38,
+      "crashedBy": "random kill at 675 ms",
+      "batches": 356,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 71200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 39,
+      "crashedBy": "store.midCompaction:2",
+      "batches": 4174,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 834800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 40,
+      "crashedBy": "random kill at 1257 ms",
+      "batches": 665,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 133000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 41,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 42,
+      "crashedBy": "random kill at 2275 ms",
+      "batches": 1216,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 243200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 43,
+      "crashedBy": "wal.afterFsync:1",
+      "batches": 4,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 44,
+      "crashedBy": "random kill at 2486 ms",
+      "batches": 1326,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 265200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 45,
+      "crashedBy": "store.afterSegment:2",
+      "batches": 908,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 181600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 46,
+      "crashedBy": "random kill at 801 ms",
+      "batches": 427,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 85400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 47,
+      "crashedBy": "store.afterManifest:2",
+      "batches": 1135,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 227000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 48,
+      "crashedBy": "random kill at 1735 ms",
+      "batches": 947,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 189400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 49,
+      "crashedBy": "store.midCompaction:2",
+      "batches": 4137,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 827400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 50,
+      "crashedBy": "random kill at 1045 ms",
+      "batches": 21,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 4200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 51,
+      "crashedBy": "wal.beforeFsync:3",
+      "batches": 9,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 52,
+      "crashedBy": "random kill at 1801 ms",
+      "batches": 911,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 182200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 53,
+      "crashedBy": "wal.afterFsync:2",
+      "batches": 6,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 54,
+      "crashedBy": "random kill at 2093 ms",
+      "batches": 943,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 188600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 55,
+      "crashedBy": "store.afterSegment:2",
+      "batches": 547,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 109400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 56,
+      "crashedBy": "random kill at 1298 ms",
+      "batches": 651,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 130200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 57,
+      "crashedBy": "store.afterManifest:2",
+      "batches": 1102,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 220400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 58,
+      "crashedBy": "random kill at 893 ms",
+      "batches": 460,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 92000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 59,
+      "crashedBy": "store.midCompaction:1",
+      "batches": 2757,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 551400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 60,
+      "crashedBy": "random kill at 1778 ms",
+      "batches": 914,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 182800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 61,
+      "crashedBy": "wal.beforeFsync:2",
+      "batches": 6,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 62,
+      "crashedBy": "random kill at 1436 ms",
+      "batches": 671,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 134200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 63,
+      "crashedBy": "wal.afterFsync:1",
+      "batches": 4,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 64,
+      "crashedBy": "random kill at 1429 ms",
+      "batches": 747,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 149400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 65,
+      "crashedBy": "store.afterSegment:1",
+      "batches": 565,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 113000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 66,
+      "crashedBy": "random kill at 2227 ms",
+      "batches": 1046,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 209200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 67,
+      "crashedBy": "store.afterManifest:1",
+      "batches": 609,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 121800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 68,
+      "crashedBy": "random kill at 601 ms",
+      "batches": 353,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 70600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 69,
+      "crashedBy": "store.midCompaction:3",
+      "batches": 4456,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 891200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 70,
+      "crashedBy": "random kill at 1809 ms",
+      "batches": 942,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 188400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 71,
+      "crashedBy": "wal.beforeFsync:2",
+      "batches": 6,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 72,
+      "crashedBy": "random kill at 2630 ms",
+      "batches": 1003,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 200600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 73,
+      "crashedBy": "wal.afterFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 74,
+      "crashedBy": "random kill at 1501 ms",
+      "batches": 768,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 153600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 75,
+      "crashedBy": "store.afterSegment:2",
+      "batches": 1014,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 202800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 76,
+      "crashedBy": "random kill at 1878 ms",
+      "batches": 946,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 189200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 77,
+      "crashedBy": "store.afterManifest:3",
+      "batches": 1384,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 276800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 78,
+      "crashedBy": "random kill at 879 ms",
+      "batches": 430,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 86000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 79,
+      "crashedBy": "store.midCompaction:1",
+      "batches": 4163,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 832600,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 80,
+      "crashedBy": "random kill at 1843 ms",
+      "batches": 997,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 199400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 81,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 82,
+      "crashedBy": "random kill at 1007 ms",
+      "batches": 554,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 110800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 83,
+      "crashedBy": "wal.afterFsync:3",
+      "batches": 9,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 84,
+      "crashedBy": "random kill at 2215 ms",
+      "batches": 1082,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 216400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 85,
+      "crashedBy": "store.afterSegment:2",
+      "batches": 1100,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 220000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 86,
+      "crashedBy": "random kill at 1217 ms",
+      "batches": 561,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 112200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 87,
+      "crashedBy": "store.afterManifest:2",
+      "batches": 1147,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 229400,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 88,
+      "crashedBy": "random kill at 934 ms",
+      "batches": 519,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 103800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 89,
+      "crashedBy": "store.midCompaction:1",
+      "batches": 4044,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 808800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 90,
+      "crashedBy": "random kill at 2408 ms",
+      "batches": 1235,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 247000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 91,
+      "crashedBy": "wal.beforeFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 92,
+      "crashedBy": "random kill at 1786 ms",
+      "batches": 980,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 196000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 93,
+      "crashedBy": "wal.afterFsync:1",
+      "batches": 5,
+      "unknownBeforeRetry": 5,
+      "ackedRecords": 1000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 94,
+      "crashedBy": "random kill at 2489 ms",
+      "batches": 1321,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 264200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 95,
+      "crashedBy": "store.afterSegment:3",
+      "batches": 1665,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 333000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 96,
+      "crashedBy": "random kill at 1421 ms",
+      "batches": 496,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 99200,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 97,
+      "crashedBy": "store.afterManifest:1",
+      "batches": 535,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 107000,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 98,
+      "crashedBy": "random kill at 2368 ms",
+      "batches": 1184,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 236800,
+      "lost": 0,
+      "duplicated": 0
+    },
+    {
+      "run": 99,
+      "crashedBy": "store.midCompaction:1",
+      "batches": 4093,
+      "unknownBeforeRetry": 4,
+      "ackedRecords": 818600,
+      "lost": 0,
+      "duplicated": 0
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "splits": {
+    "dev": {
+      "RE2-OB": {
+        "cases": 90,
+        "cases_without_logs": [],
+        "faults": [
+          "cpu",
+          "delay",
+          "disk",
+          "loss",
+          "mem",
+          "socket"
+        ],
+        "log_containers_outside_universe": [],
+        "log_lines_median": 174688.0,
+        "log_lines_total": 15053223,
+        "root_cause_cases_with_any_log": {
+          "checkoutservice": "18/18",
+          "currencyservice": "16/18",
+          "emailservice": "18/18",
+          "productcatalogservice": "3/18",
+          "recommendationservice": "18/18"
+        },
+        "root_cause_in_universe": "90/90",
+        "root_cause_log_lines_median": {
+          "checkoutservice": 1985.0,
+          "currencyservice": 54021.0,
+          "emailservice": 670.0,
+          "productcatalogservice": 0.0,
+          "recommendationservice": 13096.5
+        },
+        "root_cause_services": [
+          "checkoutservice",
+          "currencyservice",
+          "emailservice",
+          "productcatalogservice",
+          "recommendationservice"
+        ],
+        "scenarios": 30,
+        "universe_services_silent_in_n_cases": {
+          "adservice": 0,
+          "cartservice": 0,
+          "checkoutservice": 0,
+          "currencyservice": 2,
+          "emailservice": 0,
+          "frontend": 0,
+          "frontend-external": 88,
+          "paymentservice": 0,
+          "productcatalogservice": 86,
+          "recommendationservice": 0,
+          "redis": 0,
+          "shippingservice": 0
+        },
+        "universe_size": {
+          "max": 12,
+          "median": 12.0,
+          "min": 11
+        }
+      },
+      "RE3-OB": {
+        "cases": 30,
+        "cases_without_logs": [],
+        "faults": [
+          "f1",
+          "f2",
+          "f3",
+          "f4",
+          "f5"
+        ],
+        "log_containers_outside_universe": [],
+        "log_lines_median": 70193.0,
+        "log_lines_total": 2095206,
+        "root_cause_cases_with_any_log": {
+          "adservice": "9/9",
+          "cartservice": "3/3",
+          "currencyservice": "3/3",
+          "emailservice": "15/15"
+        },
+        "root_cause_in_universe": "30/30",
+        "root_cause_log_lines_median": {
+          "adservice": 2292,
+          "cartservice": 7460,
+          "currencyservice": 17938,
+          "emailservice": 172
+        },
+        "root_cause_services": [
+          "adservice",
+          "cartservice",
+          "currencyservice",
+          "emailservice"
+        ],
+        "scenarios": 10,
+        "universe_services_silent_in_n_cases": {
+          "adservice": 0,
+          "cartservice": 0,
+          "checkoutservice": 0,
+          "currencyservice": 0,
+          "emailservice": 0,
+          "frontend": 0,
+          "frontend-external": 30,
+          "paymentservice": 0,
+          "productcatalogservice": 30,
+          "recommendationservice": 0,
+          "redis": 0,
+          "shippingservice": 0
+        },
+        "universe_size": {
+          "max": 12,
+          "median": 12.0,
+          "min": 12
+        }
+      }
+    },
+    "test_a": {
+      "RE2-SS": {
+        "cases": 90,
+        "cases_without_logs": [],
+        "faults": [
+          "cpu",
+          "delay",
+          "disk",
+          "loss",
+          "mem",
+          "socket"
+        ],
+        "log_lines_median": 86442.0,
+        "log_lines_total": 7566220,
+        "root_cause_services": [
+          "carts",
+          "catalogue",
+          "orders",
+          "payment",
+          "user"
+        ],
+        "scenarios": 30
+      },
+      "RE3-SS": {
+        "cases": 30,
+        "cases_without_logs": [],
+        "faults": [
+          "f1",
+          "f2",
+          "f3",
+          "f4"
+        ],
+        "log_lines_median": 84302.0,
+        "log_lines_total": 2298238,
+        "root_cause_services": [
+          "carts",
+          "front-end",
+          "orders"
+        ],
+        "scenarios": 9
+      }
+    },
+    "test_b": {
+      "RE2-TT": {
+        "cases": 90,
+        "cases_without_logs": [
+          "re2tt_ts-auth-service_cpu_1"
+        ],
+        "faults": [
+          "cpu",
+          "delay",
+          "disk",
+          "loss",
+          "mem",
+          "socket"
+        ],
+        "log_lines_median": 267593.0,
+        "log_lines_total": 21012021,
+        "root_cause_services": [
+          "ts-auth-service",
+          "ts-order-service",
+          "ts-route-service",
+          "ts-train-service",
+          "ts-travel-service"
+        ],
+        "scenarios": 30
+      },
+      "RE3-TT": {
+        "cases": 30,
+        "cases_without_logs": [],
+        "faults": [
+          "f1",
+          "f2",
+          "f3",
+          "f4"
+        ],
+        "log_lines_median": 56728.5,
+        "log_lines_total": 1627863,
+        "root_cause_services": [
+          "ts-auth-service",
+          "ts-route-service"
+        ],
+        "scenarios": 8
+      }
+    }
+  }
+}

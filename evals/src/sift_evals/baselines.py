@@ -122,7 +122,7 @@ def main() -> None:
                     "case": case.case,
                     "method": method,
                     "universe": universe,
-                    "ranks": ranks[:50] if ranks else None,
+                    "ranks": ranks[:50] if ranks is not None else None,
                     "error": error,
                     "seconds": round(time.perf_counter() - t0, 3),
                 }

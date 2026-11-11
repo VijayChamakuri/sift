@@ -1,0 +1,10 @@
+{
+  "cases": 120,
+  "methods": [
+    "baro",
+    "mmbaro:metrics",
+    "mmbaro:logs",
+    "mmbaro:traces",
+    "mmbaro:all"
+  ]
+}

@@ -5,11 +5,18 @@ engine (OTLP intake, write-ahead log, online template mining, Parquet storage, r
 ranking) and a pre-registered measurement of that question on injected faults in real
 microservice systems.
 
-On {{head_label}} ({{head_cases}} cases), Sift ranks the root-cause service with Avg@5
-**{{sift_avg5}}** (AC@1 {{sift_ac1}}) from logs only. The same published method that RCAEval uses
-for multi-source root cause analysis, given the same logs, reaches {{logs_baro_avg5}}
-(lift over a random ranking {{logs_baro_lift}}); given metrics instead, {{metrics_baro_avg5}}.
-Paired difference, Sift minus BARO on logs: {{paired_diff}} (95% CI {{paired_ci}}).
+**The first test says: not yet, and it says why.** Sift was designed and tuned on Online
+Boutique, where it reached Avg@5 {{dev_sift_avg5}} from logs alone, against {{dev_logs_avg5}} for
+the published multi-source method given the same logs. Its configuration and seven predictions
+were then committed, and a second system, Sock Shop, was opened once. There, the frozen Sift
+reached Avg@5 **{{sift_avg5}}** (AC@1 {{sift_ac1}}) and ranked `{{sift_top1_service}}` first in
+{{sift_top1_share}} of cases. The published method on the same logs reached {{logs_baro_avg5}};
+given metrics, {{metrics_baro_avg5}}. Paired difference, Sift minus that method on logs:
+{{paired_diff}} (95% CI {{paired_ci}}). {{predictions_held}} of the seven predictions held.
+
+The reason is specific and fixable, and the fix is the next pre-registered test (below): Sift
+counts every template it has never seen as evidence, and Sock Shop's front-end writes new,
+one-off lines all the time, faults or not. Online Boutique's services rarely do.
 
 ![Avg@5 by fault type](docs/figures/by_fault.png)
 
@@ -26,6 +33,17 @@ Avg@5 is the mean of AC@1..AC@5 (RCAEval's definitions), at service level. A ran
 the same candidates scores {{chance_avg5}}. Intervals are 95% paired cluster bootstraps over
 (service, fault) scenarios. Every case counts: a failed run scores as a miss.
 
+### Pre-registered predictions
+
+{{predictions_table}}
+
+### Correct top-1 picks by evidence
+
+{{evidence_table}}
+
+On Dev, most correct picks came from restart or redeploy lines (start-up banners after the fault
+injection restarted a container). In Sock Shop, none did.
+
 ### Where logs work and where they do not
 
 {{fault_table}}
@@ -35,8 +53,10 @@ the same candidates scores {{chance_avg5}}. Intervals are 95% paired cluster boo
 ![Signal ablation](docs/figures/ablation.png)
 
 Multi-source BARO is run with RCAEval's own code; only its input changes. This isolates what
-each signal carries for that method. Whether a log-aware method does better on the same logs is
-the separate method comparison above.
+each signal carries for that method. What logs carry depends on the system: on Online Boutique
+(Dev) the logs-only variant is at chance ({{dev_logs_lift}} lift), on Sock Shop it is well above
+it ({{logs_baro_lift}}). Sock Shop has no traces, so its traces-only row ranks nothing and scores
+as a random ranking.
 
 ### Default-pick check
 
@@ -122,11 +142,28 @@ Measured with {{tp_records}} real log lines on one laptop; not extrapolated.
   any log line in only {{pc_coverage}} of its root-cause cases, so a logs-only method can only find
   it through the symptoms of others.
 
+- **Corrections after the test was read** (none changes Sift's numbers): the baseline runner
+  recorded an empty ranking as a failure, which scored Sock Shop's traces-only row as 0 instead of
+  a random ranking; fixed and re-run. The diagnosis of Sift's `front-end` failure above is
+  post-hoc analysis of Test A.
+
 ### Dev results (design set)
 
 {{dev_table}}
 
 {{dev_concentration_table}}
+
+{{dev_evidence_table}}
+
+## What's next
+
+- **Sift v2, pre-registered before Test B is opened:** score new templates against the service's
+  own rate of new templates before the alarm, as the error-surge score already does, so a chatty
+  service is not evidence by default. Designed on Dev; v1 and v2 are both scored on Test B
+  (Train Ticket), which no design has seen.
+- **Q3, investigate before alert:** sensors fire, a deterministic gate re-measures, a local model
+  decides whether to open an issue, on forward-only replay with no access to the injection time.
+- **Cost:** lossless compression and query cost on Loghub-2.0 against gzip, zstd, ClickHouse and CLP.
 
 ## Reproduce
 

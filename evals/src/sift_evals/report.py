@@ -165,6 +165,69 @@ def concentration_table(summary: dict) -> str:
     return "\n".join(rows)
 
 
+def predictions_table(test: dict, dev: dict) -> str:
+    """The predictions in PREREGISTRATION.md, each checked mechanically against the test set."""
+    s, ml = test["methods"]["sift"], test["methods"]["mmbaro:logs"]
+    g = grouped_faults(test)
+    strong = (g["code-level (RE3)"]["sift"] + g["loss"]["sift"]) / 2
+    weak = (g["cpu"]["sift"] + g["mem"]["sift"] + g["disk"]["sift"]) / 3
+    ev = test.get("sift_top1_evidence", {})
+    hits = sum(ev.values())
+    restart = ev.get("restart or redeploy", 0)
+    pd = test["paired"]["sift - mmbaro:logs"]
+    lo, hi = ml["avg5_ci"]
+    checks = [
+        (
+            "Logs-only multi-source BARO stays near chance (chance inside its 95% CI)",
+            lo <= ml["chance_avg5"] <= hi,
+            f"Avg@5 {f3(ml['avg5'])} {ci(ml['avg5_ci'])}, chance {f3(ml['chance_avg5'])}",
+        ),
+        (
+            "Sift beats logs-only multi-source BARO (paired 95% CI above zero)",
+            pd["lo"] > 0,
+            f"difference {pd['mean']:+.3f} {ci((pd['lo'], pd['hi']))}",
+        ),
+        (
+            "Sift stays below metric-based BARO on Avg@5",
+            s["avg5"] < test["methods"]["baro"]["avg5"],
+            f"{f3(s['avg5'])} vs {f3(test['methods']['baro']['avg5'])}",
+        ),
+        (
+            "Sift's AC@1 is at least metric-based BARO's",
+            s["ac1"] >= test["methods"]["baro"]["ac1"],
+            f"{f3(s['ac1'])} vs {f3(test['methods']['baro']['ac1'])}",
+        ),
+        (
+            "Sift is stronger on code-level and LOSS than on CPU, MEM, DISK",
+            strong > weak,
+            f"{f3(strong)} vs {f3(weak)} (mean Avg@5)",
+        ),
+        (
+            "Most of Sift's correct top-1 picks rest on restart or redeploy evidence",
+            hits > 0 and restart / hits > 0.5,
+            f"{restart} of {hits}",
+        ),
+        (
+            "Sift's test Avg@5 is below its Dev Avg@5",
+            s["avg5"] < dev["methods"]["sift"]["avg5"],
+            f"{f3(s['avg5'])} vs {f3(dev['methods']['sift']['avg5'])}",
+        ),
+    ]
+    rows = ["| Prediction (committed before the test set was read) | Outcome | Evidence |", "|---|---|---|"]
+    rows += [f"| {p} | {'held' if ok else '**failed**'} | {e} |" for p, ok, e in checks]
+    held = sum(ok for _, ok, _ in checks)
+    return "\n".join(rows) + f"\n\n{held} of {len(checks)} predictions held."
+
+
+def evidence_table(summary: dict) -> str:
+    ev = summary.get("sift_top1_evidence", {})
+    if not ev:
+        return "Sift ranked the answer first in no case."
+    rows = ["| Evidence behind a correct top-1 pick | Cases |", "|---|---:|"]
+    rows += [f"| {k} | {v} |" for k, v in sorted(ev.items(), key=lambda kv: -kv[1])]
+    return "\n".join(rows)
+
+
 def render(template: str, values: dict[str, str]) -> str:
     missing = sorted(set(re.findall(r"{{(\w+)}}", template)) - set(values))
     if missing:
@@ -202,7 +265,18 @@ def main() -> None:
     tuning = json.loads((RESULTS / "q1" / "dev" / "tuning.json").read_text())
     pdiff = hs["paired"]["sift - mmbaro:logs"]
     s, ml, mm = hs["methods"]["sift"], hs["methods"]["mmbaro:logs"], hs["methods"]["mmbaro:metrics"]
+    preds = predictions_table(hs, dev) if head != "dev" else "Test A not run yet."
+    top1 = hs["top1_concentration"]["sift"]
     values = {
+        "predictions_table": preds,
+        "predictions_held": preds.rsplit("\n", 1)[-1].split(" of ")[0] if head != "dev" else "None",
+        "sift_top1_service": str(top1["most_ranked_first"]),
+        "sift_top1_share": f"{top1['share_ranked_first']:.0%}",
+        "dev_sift_avg5": f3(dev["methods"]["sift"]["avg5"]),
+        "dev_logs_avg5": f3(dev["methods"]["mmbaro:logs"]["avg5"]),
+        "dev_logs_lift": f"{dev['methods']['mmbaro:logs']['lift5']:+.3f}",
+        "evidence_table": evidence_table(hs),
+        "dev_evidence_table": evidence_table(dev),
         "head_label": head_label,
         "sift_avg5": f3(s["avg5"]),
         "sift_ac1": f3(s["ac1"]),

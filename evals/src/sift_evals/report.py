@@ -21,6 +21,7 @@ from .score_q1 import score_split
 
 FIG = ROOT / "docs" / "figures"
 TEMPLATE = ROOT / "docs" / "README.template.md"
+RESULTS_TEMPLATE = ROOT / "docs" / "RESULTS.template.md"
 NAMES = {
     "sift": "Sift v1 (logs)",
     "sift_v2": "Sift v2 (logs)",
@@ -315,13 +316,31 @@ def evidence_table(summary: dict) -> str:
     return "\n".join(rows)
 
 
-def render(template: str, values: dict[str, str]) -> str:
+def render(template: str, values: dict[str, str], label: str = "template") -> str:
     missing = sorted(set(re.findall(r"{{(\w+)}}", template)) - set(values))
     if missing:
         raise SystemExit(
-            f"SIFT-E104 README template uses values that the report does not produce: {missing}\nfix: add them in report.py"
+            f"SIFT-E104 {label} uses values that the report does not produce: {missing}\nfix: add them in report.py"
         )
     return re.sub(r"{{(\w+)}}", lambda m: values[m.group(1)], template)
+
+
+def compact_avg5(summary: dict | None) -> str:
+    """Test B, Avg@5 and its interval only. Chance is an expected score, so it has no interval."""
+    if summary is None or "sift_v2" not in summary.get("methods", {}):
+        return "Test B has not been run."
+    spec = [
+        ("sift", NAMES["sift"]),
+        ("sift_v2", f"**{NAMES['sift_v2']}**"),
+        ("mmbaro:logs", NAMES["mmbaro:logs"]),
+        ("baro", NAMES["baro"]),
+    ]
+    rows = ["| Method | Avg@5 | 95% CI |", "|---|---:|---:|"]
+    for key, label in spec:
+        s = summary["methods"][key]
+        rows.append(f"| {label} | {f3(s['avg5'])} | {ci(s['avg5_ci'])} |")
+    rows.append(f"| Chance | {f3(summary['methods']['sift']['chance_avg5'])} | — |")
+    return "\n".join(rows)
 
 
 def test_b_values(tb: dict | None) -> dict[str, str]:
@@ -582,15 +601,17 @@ def main() -> None:
             "tuning_min": f3(min(t["avg5"] for t in tuning["trials"])),
             "tuning_max": f3(max(t["avg5"] for t in tuning["trials"])),
             "tuning_chosen": tuning["chosen"],
+            "headline_table": compact_avg5(summaries.get("test_b")),
         }
         | tb_values
         | q2_values()
     )
-    (ROOT / "README.md").write_text(render(TEMPLATE.read_text(), values))
+    (ROOT / "README.md").write_text(render(TEMPLATE.read_text(), values, "README template"))
+    (ROOT / "docs" / "RESULTS.md").write_text(render(RESULTS_TEMPLATE.read_text(), values, "RESULTS template"))
     from .site import build
 
     build(values, FIG)
-    print("README.md and docs/figures regenerated from", ", ".join(splits))
+    print("README.md, docs/RESULTS.md and docs/figures regenerated from", ", ".join(splits))
 
 
 if __name__ == "__main__":

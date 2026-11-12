@@ -220,8 +220,9 @@ see a failure.</p>
 <p>The durability claim is for a process crash: power loss on macOS would also need <code>F_FULLFSYNC</code> and is
 not claimed. To try it: <code>pnpm install &amp;&amp; pnpm demo</code> replays one real incident through the whole path
 in about ten seconds, with no Docker, no download and no model.</p>
-<p>The design decisions and their costs, the interfaces, and how this would grow past one node are in the
-<a href="{{repo}}#design-decisions-and-trade-offs">README</a>.</p>
+<p>The design decisions and their costs are in the
+<a href="{{repo}}#design-decisions-and-trade-offs">README</a>. Every table is in
+<a href="{{repo}}/blob/main/docs/RESULTS.md">docs/RESULTS.md</a>.</p>
 
 <h2>What's next</h2>
 <ul>

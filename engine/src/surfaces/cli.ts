@@ -35,7 +35,7 @@ const EXAMPLES: Record<string, string> = {
   serve: "sift serve --data .sift/data --port 4318",
   replay: "sift replay --logs data/rcaeval/hf/re2ob_checkoutservice_cpu_1/logs.parquet --url http://127.0.0.1:4318",
   rank: "sift rank --data .sift/data --at 1705354566 --json",
-  rca: "sift rca --logs fixtures/demo/logs.parquet --at 1705354566 --json",
+  rca: "sift rca --logs fixtures/demo/logs.parquet --at 1731905504 --json",
   watch: "SIFT_LLM_BASE_URL=http://127.0.0.1:8090/v1 sift watch --logs fixtures/demo/logs.parquet --json",
   doctor: "sift doctor --json",
   worker: "SIFT_LLM_BASE_URL=http://127.0.0.1:8090/v1 sift worker",
